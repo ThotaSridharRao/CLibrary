@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComponentHub - Modern Component Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-subtle': 'bounceSubtle 0.6s ease-in-out',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounceSubtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .component-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .tab-btn {
+            color: #9ca3af;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .code-line-numbers {
+            counter-reset: line;
+        }
+        .code-line-numbers .line::before {
+            counter-increment: line;
+            content: counter(line);
+            display: inline-block;
+            width: 2rem;
+            margin-right: 1rem;
+            text-align: right;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="glass-morphism sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <span class="text-white font-bold text-lg">C</span>
+                </div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    ComponentHub
+                </h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="showUploadModal()" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                    Upload Component
+                </button>
+                <button onclick="showLoginModal()" class="px-4 py-2 glass-morphism hover:bg-white/20 rounded-lg font-medium transition-all duration-300">
+                    Login
+                </button>
+                <button onclick="showSignupModal()" class="px-4 py-2 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                    Sign Up
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="px-6 py-16">
+        <div class="max-w-7xl mx-auto text-center">
+            <h2 class="text-5xl font-bold mb-6 animate-fade-in">
+                Discover & Share
+                <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    Beautiful Components
+                </span>
+            </h2>
+            <p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto animate-fade-in">
+                The world's largest community-driven component library. Find, customize, and share UI components with live preview and editing.
+            </p>
+            
+            <!-- Search Bar -->
+            <div class="max-w-2xl mx-auto relative animate-slide-up">
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    placeholder="Search components (e.g., button, card, modal...)"
+                    class="w-full px-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                    oninput="filterComponents()"
+                >
+                <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <span class="text-gray-400">🔍</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="px-6 py-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-wrap gap-3 justify-center" id="categoryFilter">
+                <button onclick="filterByCategory('all')" class="category-btn active px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">All</button>
+                <button onclick="filterByCategory('button')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Buttons</button>
+                <button onclick="filterByCategory('card')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Cards</button>
+                <button onclick="filterByCategory('form')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Forms</button>
+                <button onclick="filterByCategory('navigation')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Navigation</button>
+                <button onclick="filterByCategory('modal')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Modals</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Components Grid -->
+    <section class="px-6 py-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="componentsGrid">
+                <!-- Components will be populated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+        <div class="glass-morphism rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Upload New Component</h3>
+                <button onclick="closeUploadModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <form onsubmit="uploadComponent(event)" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Component Name</label>
+                    <input type="text" id="componentName" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Tags (comma separated)</label>
+                    <input type="text" id="componentTags" placeholder="button, primary, animated, loginbox" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">HTML Code</label>
+                    <textarea id="componentHTML" rows="6" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder="<button class='btn'>Click me</button>"></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">CSS Styles (optional)</label>
+                    <textarea id="componentCSS" rows="4" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm" placeholder=".btn { background: blue; color: white; }"></textarea>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button type="button" onclick="closeUploadModal()" class="flex-1 px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-6 py-3 rounded-lg transition-all duration-300">
+                        Upload Component
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+        <div class="glass-morphism rounded-2xl p-8 max-w-md w-full animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">🔐</span>
+                    </div>
+                    <h3 class="text-2xl font-bold">Welcome Back</h3>
+                </div>
+                <button onclick="closeLoginModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label for="loginEmail" class="block text-sm font-medium mb-2">Email Address</label>
+                        <input type="email" id="loginEmail" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400" placeholder="Enter your email">
+                    </div>
+                    
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium mb-2">Password</label>
+                        <div class="relative">
+                            <input type="password" id="loginPassword" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400" placeholder="Enter your password">
+                            <button type="button" onclick="togglePasswordVisibility('loginPassword')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center text-gray-300">
+                        <input type="checkbox" class="mr-2 rounded bg-white/10 border-white/20 text-blue-500 focus:ring-blue-500">
+                        Remember me
+                    </label>
+                    <a href="#" class="text-blue-400 hover:text-blue-300 transition-colors">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                    Sign In
+                </button>
+                
+                <div class="flex items-center my-6">
+                    <div class="flex-grow border-t border-white/20"></div>
+                    <span class="px-4 text-gray-400 text-sm whitespace-nowrap">or continue with</span>
+                    <div class="flex-grow border-t border-white/20"></div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" onclick="loginWithProvider('google')" class="flex items-center justify-center space-x-2 py-3 glass-morphism hover:bg-white/20 rounded-lg transition-all duration-300">
+                        <span>🔍</span>
+                        <span>Google</span>
+                    </button>
+                    <button type="button" onclick="loginWithProvider('github')" class="flex items-center justify-center space-x-2 py-3 glass-morphism hover:bg-white/20 rounded-lg transition-all duration-300">
+                        <span>🐙</span>
+                        <span>GitHub</span>
+                    </button>
+                </div>
+                
+                <p class="text-center text-gray-400 text-sm">
+                    Don't have an account? 
+                    <button type="button" onclick="switchToSignup()" class="text-blue-400 hover:text-blue-300 transition-colors font-medium">Sign up here</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+        <div class="glass-morphism rounded-2xl p-8 max-w-md w-full animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">✨</span>
+                    </div>
+                    <h3 class="text-2xl font-bold">Join ComponentHub</h3>
+                </div>
+                <button onclick="closeSignupModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <form onsubmit="handleSignup(event)" class="space-y-6">
+                <div class="space-y-4">
+                    <div>
+                        <label for="signupName" class="block text-sm font-medium mb-2">Full Name</label>
+                        <input type="text" id="signupName" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-white placeholder-gray-400" placeholder="Enter your full name">
+                    </div>
+                    
+                    <div>
+                        <label for="signupEmail" class="block text-sm font-medium mb-2">Email Address</label>
+                        <input type="email" id="signupEmail" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-white placeholder-gray-400" placeholder="Enter your email">
+                    </div>
+                    
+                    <div>
+                        <label for="signupPassword" class="block text-sm font-medium mb-2">Create Password</label>
+                        <div class="relative">
+                            <input type="password" id="signupPassword" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-white placeholder-gray-400" placeholder="Create a password">
+                            <button type="button" onclick="togglePasswordVisibility('signupPassword')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium mb-2">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-white placeholder-gray-400" placeholder="Confirm your password">
+                    </div>
+                </div>
+                
+                <!-- Password Strength Indicator -->
+                <div class="space-y-2">
+                    <div class="flex space-x-2">
+                        <div id="strength1" class="h-1 flex-1 bg-gray-600 rounded transition-colors duration-300"></div>
+                        <div id="strength2" class="h-1 flex-1 bg-gray-600 rounded transition-colors duration-300"></div>
+                        <div id="strength3" class="h-1 flex-1 bg-gray-600 rounded transition-colors duration-300"></div>
+                        <div id="strength4" class="h-1 flex-1 bg-gray-600 rounded transition-colors duration-300"></div>
+                    </div>
+                    <p id="strengthText" class="text-xs text-gray-400">Password strength: <span id="strengthLevel">Weak</span></p>
+                </div>
+                
+                <div class="flex items-start space-x-3">
+                    <input type="checkbox" id="agreeTerms" required class="mt-1 rounded bg-white/10 border-white/20 text-green-500 focus:ring-green-500">
+                    <label for="agreeTerms" class="text-sm text-gray-300">
+                        I agree to the <a href="#" class="text-green-400 hover:text-green-300 transition-colors">Terms of Service</a> and <a href="#" class="text-green-400 hover:text-green-300 transition-colors">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                    Create Account
+                </button>
+                
+                <div class="flex items-center my-6">
+                    <div class="flex-grow border-t border-white/20"></div>
+                    <span class="px-4 text-gray-400 text-sm whitespace-nowrap">or sign up with</span>
+                    <div class="flex-grow border-t border-white/20"></div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" onclick="signupWithProvider('google')" class="flex items-center justify-center space-x-2 py-3 glass-morphism hover:bg-white/20 rounded-lg transition-all duration-300">
+                        <span>🔍</span>
+                        <span>Google</span>
+                    </button>
+                    <button type="button" onclick="signupWithProvider('github')" class="flex items-center justify-center space-x-2 py-3 glass-morphism hover:bg-white/20 rounded-lg transition-all duration-300">
+                        <span>🐙</span>
+                        <span>GitHub</span>
+                    </button>
+                </div>
+                
+                <p class="text-center text-gray-400 text-sm">
+                    Already have an account? 
+                    <button type="button" onclick="switchToLogin()" class="text-green-400 hover:text-green-300 transition-colors font-medium">Sign in here</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Component Detail Modal -->
+    <div id="componentModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-morphism rounded-2xl max-w-7xl w-full h-[95vh] overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/20">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">🎨</span>
+                    </div>
+                    <div>
+                        <h3 id="modalComponentName" class="text-2xl font-bold"></h3>
+                        <p id="modalComponentAuthor" class="text-gray-400"></p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 text-gray-300">
+                        <span>❤️</span>
+                        <span id="modalComponentLikes">0</span>
+                    </div>
+                    <button onclick="likeComponent()" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors">
+                        Like
+                    </button>
+                    <button onclick="closeComponentModal()" class="text-gray-400 hover:text-white text-2xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">&times;</button>
+                </div>
+            </div>
+
+            <div class="flex h-full">
+                <!-- Left Panel - Preview & Code -->
+                <div class="flex-1 flex flex-col">
+                    <!-- Tab Navigation -->
+                    <div class="flex border-b border-white/20">
+                        <button onclick="switchTab('preview')" id="previewTab" class="tab-btn active px-6 py-4 font-medium transition-colors">
+                            👁️ Preview
+                        </button>
+                        <button onclick="switchTab('code')" id="codeTab" class="tab-btn px-6 py-4 font-medium transition-colors">
+                            💻 Code
+                        </button>
+                        <button onclick="switchTab('customize')" id="customizeTab" class="tab-btn px-6 py-4 font-medium transition-colors lg:hidden">
+                            ⚙️ Customize
+                        </button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="flex-1 overflow-hidden">
+                        <!-- Preview Tab -->
+                        <div id="previewContent" class="tab-content active h-full p-8">
+                            <div class="h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 flex items-center justify-center relative overflow-hidden">
+                                <!-- Background Pattern -->
+                                <div class="absolute inset-0 opacity-10">
+                                    <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0); background-size: 20px 20px;"></div>
+                                </div>
+                                
+                                <div id="componentPreview" class="relative z-10">
+                                    <!-- Component preview will be rendered here -->
+                                </div>
+                                
+                                <!-- Preview Controls -->
+                                <div class="absolute top-4 right-4 flex space-x-2">
+                                    <button onclick="togglePreviewTheme()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors" title="Toggle Theme">
+                                        🌓
+                                    </button>
+                                    <button onclick="centerComponent()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors" title="Center Component">
+                                        🎯
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Code Tab -->
+                        <div id="codeContent" class="tab-content h-full p-6 hidden">
+                            <div class="h-full bg-slate-900 rounded-xl overflow-hidden">
+                                <!-- Code Header -->
+                                <div class="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
+                                    <div class="flex items-center space-x-4">
+                                        <span class="text-gray-400 text-sm">Complete Code Snippet</span>
+                                        <div class="flex space-x-1">
+                                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="copyCode()" class="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm">
+                                            <span>📋</span>
+                                            <span>Copy</span>
+                                        </button>
+                                        <button onclick="downloadComponent()" class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm">
+                                            <span>⬇️</span>
+                                            <span>Download</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Code Content -->
+                                <div class="h-full overflow-auto">
+                                    <pre class="h-full"><code id="codeSnippet" class="block p-6 text-sm font-mono text-gray-300 whitespace-pre-wrap"></code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Customize Tab -->
+                        <div id="customizeContent" class="tab-content h-full p-6 hidden lg:hidden">
+                            <div class="h-full overflow-auto">
+                                <h4 class="text-lg font-semibold mb-4">Customize Component</h4>
+                                <div class="space-y-4" id="mobileCustomizationPanel">
+                                    <!-- Mobile customization controls -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Panel - Desktop Customization -->
+                <div class="hidden lg:block w-80 border-l border-white/20 flex flex-col">
+                    <div class="p-6 border-b border-white/20">
+                        <h4 class="text-lg font-semibold">Customize Component</h4>
+                        <p class="text-gray-400 text-sm mt-1">Adjust properties and see live changes</p>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <div class="space-y-6" id="customizationPanel">
+                            <!-- Customization controls will be added here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Customization Actions -->
+                    <div class="p-6 border-t border-white/20 space-y-3">
+                        <button onclick="resetCustomization()" class="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors text-sm">
+                            🔄 Reset to Default
+                        </button>
+                        <button onclick="saveCustomization()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm">
+                            💾 Save Custom Version
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        let components = [
+            {
+                id: 1,
+                name: "Gradient Button",
+                category: "button", // Changed to tag-like category
+                tags: ["button", "gradient", "animated"],
+                author: "Sarah Chen",
+                likes: 42,
+                html: `<button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105">Click Me</button>`,
+                css: "",
+                customizable: {
+                    colors: ["from-blue-500 to-purple-600", "from-green-500 to-blue-600", "from-pink-500 to-yellow-600"],
+                    sizes: ["px-4 py-2 text-sm", "px-6 py-3", "px-8 py-4 text-lg"],
+                    text: "Click Me"
+                }
+            },
+            {
+                id: 2,
+                name: "Glass Card",
+                category: "card", // Changed to tag-like category
+                tags: ["card", "glass", "modern"],
+                author: "Alex Kumar",
+                likes: 38,
+                html: `<div class="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl">
+                    <h3 class="text-xl font-bold mb-2 text-white">Glass Card</h3>
+                    <p class="text-gray-300">Beautiful glassmorphism effect with backdrop blur.</p>
+                </div>`,
+                css: "",
+                customizable: {
+                    opacity: ["bg-white/10", "bg-white/20", "bg-white/30"],
+                    blur: ["backdrop-blur-sm", "backdrop-blur-md", "backdrop-blur-lg"],
+                    title: "Glass Card"
+                }
+            },
+            {
+                id: 3,
+                name: "Animated Input",
+                category: "form", // Changed to tag-like category
+                tags: ["input", "form", "animated", "floating"],
+                author: "Maria Rodriguez",
+                likes: 56,
+                html: `<div class="relative">
+                    <input type="text" id="animatedInput" class="peer w-full px-4 py-3 bg-transparent border-2 border-gray-600 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder=" ">
+                    <label for="animatedInput" class="absolute left-4 -top-2.5 px-2 bg-slate-900 text-sm text-gray-400 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-500 transition-all duration-300">Enter your name</label>
+                </div>`,
+                css: "",
+                customizable: {
+                    colors: ["border-gray-600 focus:border-blue-500", "border-gray-600 focus:border-green-500", "border-gray-600 focus:border-purple-500"],
+                    label: "Enter your name"
+                }
+            },
+            {
+                id: 4,
+                name: "Modern Toggle",
+                category: "form", // Changed to tag-like category
+                tags: ["toggle", "switch", "modern"],
+                author: "David Park",
+                likes: 29,
+                html: `<label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>`,
+                css: "",
+                customizable: {
+                    colors: ["peer-checked:bg-blue-600", "peer-checked:bg-green-600", "peer-checked:bg-purple-600"]
+                }
+            }
+        ];
+
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let currentComponent = null;
+        let currentTab = 'preview';
+        let originalComponent = null;
+        let previewTheme = 'dark';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderComponents();
+            setupEventHandlers();
+        });
+
+        function setupEventHandlers() {
+            // Removed custom category div logic as it's no longer needed
+        }
+
+        // Auth functions
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function showSignupModal() {
+            document.getElementById('signupModal').classList.remove('hidden');
+        }
+
+        function closeSignupModal() {
+            document.getElementById('signupModal').classList.add('hidden');
+        }
+
+        function switchToSignup() {
+            closeLoginModal();
+            showSignupModal();
+        }
+
+        function switchToLogin() {
+            closeSignupModal();
+            showLoginModal();
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Simulate login process
+            showNotification('🔐 Logging in...');
+            
+            // In a real app, you'd make an API call here
+            setTimeout(() => {
+                showNotification('✅ Login successful! Welcome back!');
+                closeLoginModal();
+                // Update UI to show logged in state
+                updateUIForLoggedInUser('John Doe'); // Replace with actual user data
+            }, 1500);
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showNotification('❌ Passwords do not match!');
+                return;
+            }
+            
+            if (!document.getElementById('agreeTerms').checked) {
+                showNotification('❌ Please agree to the terms and conditions!');
+                return;
+            }
+            
+            // Simulate signup process
+            showNotification('✨ Creating your account...');
+            
+            // In a real app, you'd make an API call here
+            setTimeout(() => {
+                showNotification('🎉 Account created successfully! Welcome to ComponentHub!');
+                closeSignupModal();
+                // Update UI to show logged in state
+                updateUIForLoggedInUser(name);
+            }, 2000);
+        }
+
+        function loginWithProvider(provider) {
+            showNotification(`🚀 Redirecting to ${provider}...`);
+            // In a real app, you'd redirect to OAuth provider
+            setTimeout(() => {
+                showNotification(`✅ Successfully logged in with ${provider}!`);
+                closeLoginModal();
+                updateUIForLoggedInUser(`${provider} User`);
+            }, 2000);
+        }
+
+        function signupWithProvider(provider) {
+            showNotification(`🚀 Redirecting to ${provider}...`);
+            // In a real app, you'd redirect to OAuth provider
+            setTimeout(() => {
+                showNotification(`🎉 Successfully signed up with ${provider}!`);
+                closeSignupModal();
+                updateUIForLoggedInUser(`${provider} User`);
+            }, 2000);
+        }
+
+        function updateUIForLoggedInUser(userName) {
+            // Update navigation to show user profile
+            const authButtons = document.querySelector('.flex.items-center.space-x-4');
+            authButtons.innerHTML = `
+                <button onclick="showUploadModal()" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
+                    Upload Component
+                </button>
+                <div class="flex items-center space-x-3">
+                    <span class="text-gray-300">Hello, ${userName}!</span>
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center cursor-pointer hover:from-blue-600 hover:to-purple-700 transition-all duration-300">
+                            <span class="text-sm font-medium">${userName.charAt(0).toUpperCase()}</span>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 glass-morphism rounded-lg shadow-lg py-2 z-50">
+                            <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-white/10 transition-colors">👤 Profile</a>
+                            <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-white/10 transition-colors">🎨 My Components</a>
+                            <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-white/10 transition-colors">❤️ Liked Components</a>
+                            <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-white/10 transition-colors">⚙️ Settings</a>
+                            <hr class="border-white/20 my-2">
+                            <button onclick="logout()" class="block w-full text-left px-4 py-2 text-red-400 hover:bg-white/10 transition-colors">🚪 Logout</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function logout() {
+            showNotification('👋 Logged out successfully!');
+            // Reset UI to logged out state
+            location.reload();
+        }
+
+        // Password strength checker
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('signupPassword');
+            if (passwordInput) {
+                passwordInput.addEventListener('input', checkPasswordStrength);
+            }
+        });
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('signupPassword').value;
+            const strengthBars = [
+                document.getElementById('strength1'),
+                document.getElementById('strength2'),
+                document.getElementById('strength3'),
+                document.getElementById('strength4')
+            ];
+            const strengthText = document.getElementById('strengthLevel');
+            
+            let strength = 0;
+            let level = 'Weak';
+            
+            // Length check
+            if (password.length >= 8) strength++;
+            
+            // Lowercase and uppercase
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            
+            // Numbers
+            if (/\d/.test(password)) strength++;
+            
+            // Special characters
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength++;
+            
+            // Reset bars
+            strengthBars.forEach(bar => {
+                bar.className = 'h-1 flex-1 bg-gray-600 rounded transition-colors duration-300';
+            });
+            
+            // Set strength level and colors
+            switch(strength) {
+                case 0:
+                case 1:
+                    level = 'Weak';
+                    strengthBars[0].classList.add('bg-red-500');
+                    break;
+                case 2:
+                    level = 'Fair';
+                    strengthBars[0].classList.add('bg-yellow-500');
+                    strengthBars[1].classList.add('bg-yellow-500');
+                    break;
+                case 3:
+                    level = 'Good';
+                    strengthBars[0].classList.add('bg-blue-500');
+                    strengthBars[1].classList.add('bg-blue-500');
+                    strengthBars[2].classList.add('bg-blue-500');
+                    break;
+                case 4:
+                    level = 'Strong';
+                    strengthBars.forEach(bar => bar.classList.add('bg-green-500'));
+                    break;
+            }
+            
+            strengthText.textContent = level;
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const loginModal = document.getElementById('loginModal');
+            const signupModal = document.getElementById('signupModal');
+            const userMenu = document.getElementById('userMenu');
+            
+            if (event.target === loginModal) {
+                closeLoginModal();
+            }
+            if (event.target === signupModal) {
+                closeSignupModal();
+            }
+            if (userMenu && !event.target.closest('.relative') && !userMenu.classList.contains('hidden')) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        function renderComponents() {
+            const grid = document.getElementById('componentsGrid');
+            const filteredComponents = components.filter(component => {
+                const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter); // Updated filter logic
+                const matchesSearch = currentSearch === '' || 
+                    component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                    component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
+                return matchesCategory && matchesSearch;
+            });
+
+            grid.innerHTML = filteredComponents.map(component => `
+                <div class="glass-morphism rounded-xl p-6 hover:bg-white/20 transition-all duration-300 cursor-pointer transform hover:scale-105 animate-fade-in" onclick="openComponentModal(${component.id})">
+                    <div class="component-preview rounded-lg p-4 mb-4 min-h-[120px] flex items-center justify-center">
+                        ${component.html}
+                    </div>
+                    <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
+                    <p class="text-gray-400 text-sm mb-3">by ${component.author}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-wrap gap-1">
+                            ${component.tags.slice(0, 2).map(tag => `<span class="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded">#${tag}</span>`).join('')}
+                        </div>
+                        <div class="flex items-center text-sm text-gray-400">
+                            <span class="mr-1">❤️</span>
+                            ${component.likes}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterComponents() {
+            currentSearch = document.getElementById('searchInput').value;
+            renderComponents();
+        }
+
+        function filterByCategory(category) {
+            currentFilter = category;
+            
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-500/20', 'text-blue-300');
+                btn.classList.add('bg-white/10');
+            });
+            event.target.classList.add('active', 'bg-blue-500/20', 'text-blue-300');
+            event.target.classList.remove('bg-white/10');
+            
+            renderComponents();
+        }
+
+        function showUploadModal() {
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+        }
+
+        function uploadComponent(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('componentName').value;
+            const tagsInput = document.getElementById('componentTags').value;
+            const tags = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const html = document.getElementById('componentHTML').value;
+            const css = document.getElementById('componentCSS').value;
+            
+            // Determine category from the first tag, or default to 'custom'
+            const category = tags.length > 0 ? tags[0] : 'custom'; 
+            
+            const newComponent = {
+                id: components.length + 1,
+                name,
+                category,
+                tags,
+                author: "You",
+                likes: 0,
+                html,
+                css,
+                customizable: {}
+            };
+            
+            components.unshift(newComponent);
+            renderComponents();
+            closeUploadModal();
+            
+            // Reset form
+            event.target.reset();
+            
+            // Show success animation
+            showNotification('Component uploaded successfully! 🎉');
+        }
+
+        function openComponentModal(componentId) {
+            currentComponent = components.find(c => c.id === componentId);
+            originalComponent = JSON.parse(JSON.stringify(currentComponent)); // Deep copy
+            const modal = document.getElementById('componentModal');
+            const preview = document.getElementById('componentPreview');
+            const nameEl = document.getElementById('modalComponentName');
+            const authorEl = document.getElementById('modalComponentAuthor');
+            const likesEl = document.getElementById('modalComponentLikes');
+            
+            nameEl.textContent = currentComponent.name;
+            authorEl.textContent = `by ${currentComponent.author}`;
+            likesEl.textContent = currentComponent.likes;
+            
+            // Switch to preview tab by default
+            switchTab('preview');
+            
+            // Render component with styles
+            updateComponentPreview();
+            updateCodeSnippet();
+            
+            // Setup customization panel
+            setupCustomizationPanel();
+            
+            modal.classList.remove('hidden');
+        }
+
+        function updateComponentPreview() {
+            const preview = document.getElementById('componentPreview');
+            let componentHTML = currentComponent.html;
+            if (currentComponent.css) {
+                componentHTML = `<style>${currentComponent.css}</style>${componentHTML}`;
+            }
+            preview.innerHTML = componentHTML;
+        }
+
+        function updateCodeSnippet() {
+            const codeEl = document.getElementById('codeSnippet');
+            let fullCode = '';
+            
+            // Combine HTML and CSS into a complete snippet
+            if (currentComponent.css && currentComponent.css.trim()) {
+                fullCode += `<style>\n${currentComponent.css}\n</style>\n\n`;
+            }
+            
+            fullCode += currentComponent.html;
+            
+            // Add syntax highlighting classes and format
+            const formattedCode = formatCode(fullCode);
+            codeEl.innerHTML = formattedCode;
+        }
+
+        function formatCode(code) {
+            // Simple code formatting - in production you'd use a proper syntax highlighter
+            return code
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            const activeContent = document.getElementById(`${tabName}Content`);
+            activeContent.classList.add('active');
+            activeContent.style.display = 'block';
+            
+            // Update code when switching to code tab
+            if (tabName === 'code') {
+                updateCodeSnippet();
+            }
+        }
+
+        function togglePreviewTheme() {
+            const preview = document.getElementById('componentPreview').parentElement;
+            previewTheme = previewTheme === 'dark' ? 'light' : 'dark';
+            
+            if (previewTheme === 'light') {
+                preview.className = preview.className.replace('from-slate-800 to-slate-900', 'from-gray-100 to-gray-200');
+                preview.style.color = '#1f2937';
+            } else {
+                preview.className = preview.className.replace('from-gray-100 to-gray-200', 'from-slate-800 to-slate-900');
+                preview.style.color = '#ffffff';
+            }
+        }
+
+        function centerComponent() {
+            const preview = document.getElementById('componentPreview');
+            preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function likeComponent() {
+            currentComponent.likes++;
+            document.getElementById('modalComponentLikes').textContent = currentComponent.likes;
+            
+            // Update in main components array
+            const mainComponent = components.find(c => c.id === currentComponent.id);
+            if (mainComponent) {
+                mainComponent.likes = currentComponent.likes;
+            }
+            
+            // Update main grid if visible
+            renderComponents();
+            
+            showNotification('❤️ Component liked!');
+        }
+
+        function resetCustomization() {
+            currentComponent = JSON.parse(JSON.stringify(originalComponent));
+            updateComponentPreview();
+            updateCodeSnippet();
+            setupCustomizationPanel();
+            showNotification('🔄 Reset to original');
+        }
+
+        function saveCustomization() {
+            // In a real app, this would save to the user's collection
+            const customName = `${originalComponent.name} (Custom)`;
+            const customComponent = {
+                ...currentComponent,
+                id: components.length + 1,
+                name: customName,
+                author: "You",
+                likes: 0
+            };
+            
+            components.unshift(customComponent);
+            renderComponents();
+            showNotification('💾 Custom version saved!');
+        }
+
+        function closeComponentModal() {
+            document.getElementById('componentModal').classList.add('hidden');
+        }
+
+        function setupCustomizationPanel() {
+            const panel = document.getElementById('customizationPanel');
+            const mobilePanel = document.getElementById('mobileCustomizationPanel');
+            const customizable = currentComponent.customizable;
+            
+            if (!customizable || Object.keys(customizable).length === 0) {
+                const noCustomMsg = '<p class="text-gray-400 text-center py-8">No customization options available for this component</p>';
+                panel.innerHTML = noCustomMsg;
+                if (mobilePanel) mobilePanel.innerHTML = noCustomMsg;
+                return;
+            }
+            
+            let controlsHTML = '';
+            
+            Object.entries(customizable).forEach(([key, values]) => {
+                if (Array.isArray(values)) {
+                    controlsHTML += `
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300 capitalize">${key.replace(/([A-Z])/g, ' $1')}</label>
+                            <select onchange="updateComponent('${key}', this.value)" class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                                ${values.map((value, index) => `<option value="${value}" ${index === 0 ? 'selected' : ''}>${formatOptionLabel(key, value)}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else if (typeof values === 'string') {
+                    controlsHTML += `
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300 capitalize">${key.replace(/([A-Z])/g, ' $1')}</label>
+                            <input type="text" value="${values}" onchange="updateComponent('${key}', this.value)" class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                        </div>
+                    `;
+                }
+            });
+            
+            panel.innerHTML = controlsHTML;
+            if (mobilePanel) mobilePanel.innerHTML = controlsHTML;
+        }
+
+        function formatOptionLabel(key, value) {
+            // Format option labels to be more user-friendly
+            if (key === 'colors') {
+                return value.replace(/from-(\w+)-\d+\s+to-(\w+)-\d+/, '$1 to $2');
+            } else if (key === 'sizes') {
+                if (value.includes('text-sm')) return 'Small';
+                if (value.includes('text-lg')) return 'Large';
+                return 'Medium';
+            } else if (key === 'opacity') {
+                return value.replace('bg-white/', '') + '% opacity';
+            } else if (key === 'blur') {
+                return value.replace('backdrop-blur-', '').replace('sm', 'light').replace('md', 'medium').replace('lg', 'heavy');
+            }
+            return value;
+        }
+
+        function updateComponent(property, value) {
+            const preview = document.getElementById('componentPreview');
+            let html = currentComponent.html;
+            
+            // Simple customization logic - in a real app, this would be more sophisticated
+            if (property === 'colors' && html.includes('bg-gradient-to-r')) {
+                html = html.replace(/from-\w+-\d+\s+to-\w+-\d+/g, value);
+            } else if (property === 'sizes' && html.includes('px-')) {
+                html = html.replace(/px-\d+\s+py-\d+(\s+text-\w+)?/g, value);
+            } else if (property === 'text') {
+                html = html.replace(/>([^<]+)</g, `>${value}<`);
+            } else if (property === 'title') {
+                html = html.replace(/>([^<]+)</g, `>${value}<`);
+            } else if (property === 'label') {
+                // This regex specifically targets the bg-slate-900 class within the label's class attribute
+                html = html.replace(/(<label for="[^"]+?" class="[^"]*?)bg-slate-900(\s*text-sm text-gray-400[^"]*?">)/g, '$1$2');
+            } else if (property === 'opacity') {
+                html = html.replace(/bg-white\/\d+/g, value);
+            } else if (property === 'blur') {
+                html = html.replace(/backdrop-blur-\w+/g, value);
+            }
+            
+            // Update current component
+            currentComponent.html = html;
+            
+            // Update preview
+            updateComponentPreview();
+            
+            // Update code snippet if code tab is active
+            if (currentTab === 'code') {
+                updateCodeSnippet();
+            }
+        }
+
+        function copyCode() {
+            let fullCode = '';
+            
+            if (currentComponent.css && currentComponent.css.trim()) {
+                fullCode += `<style>\n${currentComponent.css}\n</style>\n\n`;
+            }
+            
+            fullCode += currentComponent.html;
+            
+            navigator.clipboard.writeText(fullCode).then(() => {
+                showNotification('📋 Complete code copied to clipboard!');
+            });
+        }
+
+        function downloadComponent() {
+            let content = '';
+            
+            if (currentComponent.css && currentComponent.css.trim()) {
+                content += `<style>\n${currentComponent.css}\n</style>\n\n`;
+            }
+            
+            content += currentComponent.html;
+            
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentComponent.name.toLowerCase().replace(/\s+/g, '-')}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('⬇️ Component downloaded as HTML file!');
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Add some smooth scrolling and animations
+        document.addEventListener('scroll', function() {
+            const elements = document.querySelectorAll('.animate-fade-in');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('animate-bounce-subtle');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
