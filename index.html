@@ -890,7 +890,7 @@
 
         async function fetchComponents() {
             try {
-                const res = await fetch(`https://clibrarybackend.onrender.com/api/components`);
+                const res = await fetch(`${API_BASE}/components`);
                 components = await res.json();
                 renderComponents();
             } catch (err) {
