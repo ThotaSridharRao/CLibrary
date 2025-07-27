@@ -930,27 +930,39 @@
         async function uploadComponent(event) {
             event.preventDefault();
 
-            const name = document.getElementById('componentName').value;
-            const tags = document.getElementById('componentTags').value.split(',').map(t => t.trim());
-            const html = document.getElementById('componentHTML').value;
-            const css = document.getElementById('componentCSS').value;
+            const name = document.getElementById('componentName').value.trim();
+            const tags = document.getElementById('componentTags').value
+                .split(',')
+                .map(t => t.trim())
+                .filter(Boolean);
+            const html = document.getElementById('componentHTML').value.trim();
+            const css = document.getElementById('componentCSS').value.trim();
             const category = tags[0] || "custom";
+
+            if (!authToken) {
+                showNotification("❌ You must be logged in to upload a component.");
+                return;
+            }
+
+            if (!name || !html) {
+                showNotification("❌ Component name and HTML code are required.");
+                return;
+            }
 
             try {
                 const res = await fetch(`${API_BASE}/components`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({ name, tags, category, html, css })
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ name, tags, category, html, css })
                 });
 
                 const result = await res.json();
+                if (!res.ok) throw new Error(result.message || "Upload failed");
 
-                if (!res.ok) throw new Error(result.message);
-
-                components.unshift(result); // add new component to list
+                components.unshift(result);
                 renderComponents();
                 closeUploadModal();
                 event.target.reset();
@@ -959,6 +971,7 @@
                 showNotification(`❌ Upload failed: ${err.message}`);
             }
         }
+
         function renderComponents() {
             const grid = document.getElementById('componentsGrid');
             const filteredComponents = components.filter(component => {
