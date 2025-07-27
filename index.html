@@ -992,26 +992,34 @@
 
 
         function openComponentModal(componentId) {
-            currentComponent = components.find(c => c.id === componentId);
+            currentComponent = components.find(c => c._id === componentId); // ✅ Fixed here
+
+            if (!currentComponent) {
+                showNotification("❌ Component not found");
+                return;
+            }
+
             originalComponent = JSON.parse(JSON.stringify(currentComponent));
+
             const modal = document.getElementById('componentModal');
             const nameEl = document.getElementById('modalComponentName');
             const authorEl = document.getElementById('modalComponentAuthor');
             const likesEl = document.getElementById('modalComponentLikes');
             
             if (nameEl) nameEl.textContent = currentComponent.name;
-            if (authorEl) authorEl.textContent = `by ${currentComponent.author}`;
+            if (authorEl) authorEl.textContent = `by ${currentUser && currentComponent.author === currentUser.id ? 'You' : currentComponent.author}`;
             if (likesEl) likesEl.textContent = currentComponent.likes;
             
             // Switch to preview tab by default
             switchTab('preview');
-            
+
             // Render component with styles
             updateComponentPreview();
             updateCodeSnippet();
-            
+
             modal.classList.remove('hidden');
         }
+
 
         function updateComponentPreview() {
             const preview = document.getElementById('componentPreview');
