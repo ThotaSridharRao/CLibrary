@@ -956,39 +956,39 @@
                 showNotification(`❌ Upload failed: ${err.message}`);
             }
         }
-        function renderComponents() {
-            const grid = document.getElementById('componentsGrid');
-            const filteredComponents = components.filter(component => {
-                const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter);
-                const matchesSearch = currentSearch === '' || 
-                    component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
-                    component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
-                return matchesCategory && matchesSearch;
-            });
+        // function renderComponents() {
+        //     const grid = document.getElementById('componentsGrid');
+        //     const filteredComponents = components.filter(component => {
+        //         const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter);
+        //         const matchesSearch = currentSearch === '' || 
+        //             component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+        //             component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
+        //         return matchesCategory && matchesSearch;
+        //     });
 
-            grid.innerHTML = filteredComponents.map(component => `
-                <div class="glass-morphism rounded-xl p-6 hover:bg-white/20 transition-all duration-300 cursor-pointer transform hover:scale-105 animate-fade-in"
-                    onclick="openComponentModal('${component._id}')">
-                    <div class="component-preview rounded-lg p-4 mb-4 min-h-[120px] flex items-center justify-center">
-                        ${component.html}
-                    </div>
-                    <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
-                    <p class="text-gray-400 text-sm mb-3">
-                        👤 ${currentUser && component.author === currentUser.id ? 'You' : component.author}
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <div class="flex flex-wrap gap-1">
-                            ${component.tags.map(tag => `
-                                <span class="text-xs text-blue-300 bg-blue-900/20 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-800/30 transition"
-                                    onclick="filterComponentsByTag('${tag}')">#${tag}</span>`).join('')}
-                        </div>
-                        <div class="flex items-center text-sm text-gray-400">
-                            <span class="mr-1">❤️</span> ${component.likes}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+        //     grid.innerHTML = filteredComponents.map(component => `
+        //         <div class="glass-morphism rounded-xl p-6 hover:bg-white/20 transition-all duration-300 cursor-pointer transform hover:scale-105 animate-fade-in"
+        //             onclick="openComponentModal('${component._id}')">
+        //             <div class="component-preview rounded-lg p-4 mb-4 min-h-[120px] flex items-center justify-center">
+        //                 ${component.html}
+        //             </div>
+        //             <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
+        //             <p class="text-gray-400 text-sm mb-3">
+        //                 👤 ${currentUser && component.author === currentUser.id ? 'You' : component.author}
+        //             </p>
+        //             <div class="flex items-center justify-between">
+        //                 <div class="flex flex-wrap gap-1">
+        //                     ${component.tags.map(tag => `
+        //                         <span class="text-xs text-blue-300 bg-blue-900/20 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-800/30 transition"
+        //                             onclick="filterComponentsByTag('${tag}')">#${tag}</span>`).join('')}
+        //                 </div>
+        //                 <div class="flex items-center text-sm text-gray-400">
+        //                     <span class="mr-1">❤️</span> ${component.likes}
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     `).join('');
+        // }
 
 
         function openComponentModal(componentId) {
