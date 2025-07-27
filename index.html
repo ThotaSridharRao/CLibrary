@@ -974,13 +974,8 @@
                     </div>
                     <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
                     <p class="text-gray-400 text-sm mb-3">
-                        👤 ${
-                            currentUser && component.author?._id === currentUser.id
-                                ? 'You'
-                                : component.author?.name || 'Unknown'
-                        }
+                        👤 ${currentUser && component.author === currentUser.id ? 'You' : component.author}
                     </p>
-
                     <div class="flex items-center justify-between">
                         <div class="flex flex-wrap gap-1">
                             ${component.tags.map(tag => `
@@ -997,39 +992,26 @@
 
 
         function openComponentModal(componentId) {
-            currentComponent = components.find(c => c._id === componentId); // ✅ Fixed here
-
-            if (!currentComponent) {
-                showNotification("❌ Component not found");
-                return;
-            }
-
+            currentComponent = components.find(c => c.id === componentId);
             originalComponent = JSON.parse(JSON.stringify(currentComponent));
-
             const modal = document.getElementById('componentModal');
             const nameEl = document.getElementById('modalComponentName');
             const authorEl = document.getElementById('modalComponentAuthor');
             const likesEl = document.getElementById('modalComponentLikes');
             
             if (nameEl) nameEl.textContent = currentComponent.name;
-            if (authorEl) {
-                const isYou = currentUser && currentComponent.author?._id === currentUser.id;
-                const authorName = isYou ? "You" : currentComponent.author?.name || "Unknown";
-                authorEl.textContent = `by ${authorName}`;
-            }
-
+            if (authorEl) authorEl.textContent = `by ${currentComponent.author}`;
             if (likesEl) likesEl.textContent = currentComponent.likes;
             
             // Switch to preview tab by default
             switchTab('preview');
-
+            
             // Render component with styles
             updateComponentPreview();
             updateCodeSnippet();
-
+            
             modal.classList.remove('hidden');
         }
-
 
         function updateComponentPreview() {
             const preview = document.getElementById('componentPreview');
