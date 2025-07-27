@@ -992,7 +992,7 @@
 
 
         function openComponentModal(componentId) {
-            currentComponent = components.find(c => c.id === componentId);
+            currentComponent = components.find(c => c._id === componentId);
             originalComponent = JSON.parse(JSON.stringify(currentComponent));
             const modal = document.getElementById('componentModal');
             const nameEl = document.getElementById('modalComponentName');
@@ -1364,7 +1364,7 @@
             }
             
             // Update in main components array
-            const mainComponent = components.find(c => c.id === currentComponent.id);
+            const mainComponent = components.find(c => c._id === currentComponent._id);
             if (mainComponent) {
                 mainComponent.likes = currentComponent.likes;
             }
