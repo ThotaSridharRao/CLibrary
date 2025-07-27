@@ -964,17 +964,18 @@
                     tags, 
                     category, 
                     html, 
-                    css: css || undefined // Don't send empty string, send undefined
-                };
+                    css: css || ""  // Always send string
+                    };
 
-                const res = await fetch(`${API_BASE}/components`, {
+                    const res = await fetch(`${API_BASE}/components`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${authToken}`
                     },
                     body: JSON.stringify(payload)
-                });
+            });
+
 
                 // Log response for debugging
                 console.log('Response status:', res.status);
