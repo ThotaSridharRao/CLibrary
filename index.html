@@ -941,6 +941,7 @@
 
             if (!authToken) {
                 showNotification("❌ You must be logged in to upload a component.");
+                showLoginModal();
                 return;
             }
 
@@ -949,26 +950,72 @@
                 return;
             }
 
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span>⏳</span> Uploading...';
+            submitBtn.disabled = true;
+
             try {
+                console.log('Uploading component:', { name, tags, category, html: html.substring(0, 100) + '...', css: css.substring(0, 100) + '...' });
+                
+                const payload = { 
+                    name, 
+                    tags, 
+                    category, 
+                    html, 
+                    css: css || undefined // Don't send empty string, send undefined
+                };
+
                 const res = await fetch(`${API_BASE}/components`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${authToken}`
-                },
-                body: JSON.stringify({ name, tags, category, html, css })
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(payload)
                 });
 
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.message || "Upload failed");
+                // Log response for debugging
+                console.log('Response status:', res.status);
+                console.log('Response headers:', Object.fromEntries(res.headers.entries()));
 
+                let result;
+                try {
+                    const responseText = await res.text();
+                    console.log('Raw response:', responseText);
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Failed to parse response:', parseError);
+                    throw new Error('Server returned invalid response format');
+                }
+
+                if (!res.ok) {
+                    console.error('Upload failed:', result);
+                    throw new Error(result.message || result.error || `Server error: ${res.status}`);
+                }
+
+                // Success
+                console.log('Upload successful:', result);
                 components.unshift(result);
                 renderComponents();
                 closeUploadModal();
-                event.target.reset();
+                
+                // Reset form
+                document.getElementById('componentName').value = '';
+                document.getElementById('componentTags').value = '';
+                document.getElementById('componentHTML').value = '';
+                document.getElementById('componentCSS').value = '';
+                
                 showNotification("🎉 Component uploaded successfully!");
+                
             } catch (err) {
+                console.error('Upload error:', err);
                 showNotification(`❌ Upload failed: ${err.message}`);
+            } finally {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
         }
 
