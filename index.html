@@ -974,8 +974,13 @@
                     </div>
                     <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
                     <p class="text-gray-400 text-sm mb-3">
-                        👤 ${currentUser && component.author === currentUser.id ? 'You' : component.author}
+                        👤 ${
+                            currentUser && component.author?._id === currentUser.id
+                                ? 'You'
+                                : component.author?.name || 'Unknown'
+                        }
                     </p>
+
                     <div class="flex items-center justify-between">
                         <div class="flex flex-wrap gap-1">
                             ${component.tags.map(tag => `
@@ -1007,7 +1012,12 @@
             const likesEl = document.getElementById('modalComponentLikes');
             
             if (nameEl) nameEl.textContent = currentComponent.name;
-            if (authorEl) authorEl.textContent = `by ${currentUser && currentComponent.author === currentUser.id ? 'You' : currentComponent.author}`;
+            if (authorEl) {
+                const isYou = currentUser && currentComponent.author?._id === currentUser.id;
+                const authorName = isYou ? "You" : currentComponent.author?.name || "Unknown";
+                authorEl.textContent = `by ${authorName}`;
+            }
+
             if (likesEl) likesEl.textContent = currentComponent.likes;
             
             // Switch to preview tab by default
