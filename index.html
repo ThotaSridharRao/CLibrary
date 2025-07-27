@@ -936,7 +936,7 @@
                 .map(t => t.trim())
                 .filter(Boolean);
             const html = document.getElementById('componentHTML').value.trim();
-            const css = document.getElementById('componentCSS').value.trim();
+            const css = document.getElementById('componentCSS').value.trim() || "";
             const category = tags[0] || "custom";
 
             if (!authToken) {
