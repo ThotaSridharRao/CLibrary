@@ -957,61 +957,43 @@
             submitBtn.disabled = true;
 
             try {
-                console.log('Uploading component:', { name, tags, category, html: html.substring(0, 100) + '...', css: css.substring(0, 100) + '...' });
-                
-                const payload = { 
-                    name, 
-                    tags, 
-                    category, 
-                    html, 
+                const payload = {
+                    name,
+                    tags,
+                    category,
+                    html,
                     css: css || ""  // Always send string
-                    };
+                };
 
-                    const res = await fetch(`${API_BASE}/components`, {
+                const res = await fetch(`${API_BASE}/components`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${authToken}`
                     },
                     body: JSON.stringify(payload)
-            });
+                });
 
-
-                // Log response for debugging
-                console.log('Response status:', res.status);
-                console.log('Response headers:', Object.fromEntries(res.headers.entries()));
-
-                let result;
-                try {
-                    const responseText = await res.text();
-                    console.log('Raw response:', responseText);
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('Failed to parse response:', parseError);
-                    throw new Error('Server returned invalid response format');
-                }
+                const result = await res.json();
 
                 if (!res.ok) {
-                    console.error('Upload failed:', result);
                     throw new Error(result.message || result.error || `Server error: ${res.status}`);
                 }
 
                 // Success
-                console.log('Upload successful:', result);
                 components.unshift(result);
                 renderComponents();
                 closeUploadModal();
-                
+
                 // Reset form
                 document.getElementById('componentName').value = '';
                 document.getElementById('componentTags').value = '';
                 document.getElementById('componentHTML').value = '';
                 document.getElementById('componentCSS').value = '';
-                
+
                 showNotification("🎉 Component uploaded successfully!");
-                
+
             } catch (err) {
-                console.error('Upload error:', err);
                 showNotification(`❌ Upload failed: ${err.message}`);
             } finally {
                 // Reset button state
