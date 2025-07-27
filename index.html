@@ -54,17 +54,19 @@
         .tab-content.active {
             display: block;
         }
-        .code-line-numbers {
-            counter-reset: line;
+        .editor-tab-btn {
+            color: #9ca3af;
+            border-bottom: 2px solid transparent;
         }
-        .code-line-numbers .line::before {
-            counter-increment: line;
-            content: counter(line);
-            display: inline-block;
-            width: 2rem;
-            margin-right: 1rem;
-            text-align: right;
-            color: #6b7280;
+        .editor-tab-btn.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        .editor-content {
+            display: none;
+        }
+        .editor-content.active {
+            display: block;
         }
     </style>
 </head>
@@ -127,7 +129,7 @@
     <section class="px-6 py-8">
         <div class="max-w-7xl mx-auto">
             <div class="flex flex-wrap gap-3 justify-center" id="categoryFilter">
-                <button onclick="filterByCategory('all')" class="category-btn active px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">All</button>
+                <button onclick="filterByCategory('all')" class="category-btn active px-6 py-2 rounded-full bg-blue-500/20 text-blue-300 transition-all duration-300 border border-white/20">All</button>
                 <button onclick="filterByCategory('button')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Buttons</button>
                 <button onclick="filterByCategory('card')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Cards</button>
                 <button onclick="filterByCategory('form')" class="category-btn px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 border border-white/20">Forms</button>
@@ -380,8 +382,8 @@
                         <button onclick="switchTab('code')" id="codeTab" class="tab-btn px-6 py-4 font-medium transition-colors">
                             💻 Code
                         </button>
-                        <button onclick="switchTab('customize')" id="customizeTab" class="tab-btn px-6 py-4 font-medium transition-colors lg:hidden">
-                            ⚙️ Customize
+                        <button onclick="switchTab('liveEditor')" id="liveEditorTab" class="tab-btn px-6 py-4 font-medium transition-colors">
+                            ✨ Live Editor
                         </button>
                     </div>
 
@@ -443,38 +445,172 @@
                             </div>
                         </div>
 
-                        <!-- Mobile Customize Tab -->
-                        <div id="customizeContent" class="tab-content h-full p-6 hidden lg:hidden">
-                            <div class="h-full overflow-auto">
-                                <h4 class="text-lg font-semibold mb-4">Customize Component</h4>
-                                <div class="space-y-4" id="mobileCustomizationPanel">
-                                    <!-- Mobile customization controls -->
+                        <!-- Live Editor Tab -->
+                        <div id="liveEditorContent" class="tab-content h-full hidden">
+                            <div class="flex h-full">
+                                <!-- Left Panel - Live Preview -->
+                                <div class="flex-1 border-r border-white/20 flex flex-col">
+                                    <div class="p-4 border-b border-white/20 flex items-center justify-between">
+                                        <h4 class="font-semibold text-gray-300">Live Preview</h4>
+                                        <div class="flex space-x-2">
+                                            <button onclick="toggleEditorPreviewTheme()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors" title="Toggle Theme">
+                                                🌓
+                                            </button>
+                                            <button onclick="resetLiveEditor()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors" title="Reset">
+                                                🔄
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 p-4">
+                                        <div id="livePreviewContainer" class="h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 flex items-center justify-center relative overflow-hidden">
+                                            <!-- Background Pattern -->
+                                            <div class="absolute inset-0 opacity-10">
+                                                <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0); background-size: 20px 20px;"></div>
+                                            </div>
+                                            
+                                            <div id="livePreview" class="relative z-10">
+                                                <!-- Live preview will be rendered here -->
+                                            </div>
+                                            
+                                            <!-- Error Display -->
+                                            <div id="previewError" class="absolute inset-0 flex items-center justify-center bg-red-900/20 backdrop-blur-sm rounded-xl hidden">
+                                                <div class="text-center p-6">
+                                                    <div class="text-4xl mb-4">⚠️</div>
+                                                    <h3 class="text-lg font-semibold text-red-300 mb-2">Preview Error</h3>
+                                                    <p id="errorMessage" class="text-red-200 text-sm"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right Panel - Code Editors -->
+                                <div class="flex-1 flex flex-col">
+                                    <!-- Editor Tab Navigation -->
+                                    <div class="flex border-b border-white/20">
+                                        <button onclick="switchEditorTab('html')" id="htmlEditorTab" class="editor-tab-btn active px-4 py-3 text-sm font-medium transition-colors border-b-2 border-blue-500 text-blue-400">
+                                            📝 HTML
+                                        </button>
+                                        <button onclick="switchEditorTab('css')" id="cssEditorTab" class="editor-tab-btn px-4 py-3 text-sm font-medium transition-colors border-b-2 border-transparent text-gray-400 hover:text-white">
+                                            🎨 CSS
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Editor Actions -->
+                                    <div class="p-3 border-b border-white/20 flex items-center justify-between bg-slate-800/50">
+                                        <span class="text-sm text-gray-400">Live Editor - Changes reflect instantly</span>
+                                        <div class="flex space-x-2">
+                                            <button onclick="formatCode()" class="flex items-center space-x-1 px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm transition-colors">
+                                                <span>✨</span>
+                                                <span>Format</span>
+                                            </button>
+                                            <button onclick="copyCompleteCode()" class="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors">
+                                                <span>📋</span>
+                                                <span>Copy</span>
+                                            </button>
+                                            <button onclick="resetEditorCode()" class="flex items-center space-x-1 px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded text-sm transition-colors">
+                                                <span>🔄</span>
+                                                <span>Reset</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Code Editor Content -->
+                                    <div class="flex-1 relative">
+                                        <!-- HTML Editor -->
+                                        <div id="htmlEditorContent" class="editor-content absolute inset-0">
+                                            <textarea 
+                                                id="htmlEditor" 
+                                                class="w-full h-full p-4 bg-slate-900 text-gray-300 font-mono text-sm resize-none focus:outline-none border-none"
+                                                placeholder="Enter your HTML code here..."
+                                                oninput="updateLivePreview()"
+                                                spellcheck="false"
+                                            ></textarea>
+                                        </div>
+                                        
+                                        <!-- CSS Editor -->
+                                        <div id="cssEditorContent" class="editor-content absolute inset-0 hidden">
+                                            <textarea 
+                                                id="cssEditor" 
+                                                class="w-full h-full p-4 bg-slate-900 text-gray-300 font-mono text-sm resize-none focus:outline-none border-none"
+                                                placeholder="Enter your CSS code here..."
+                                                oninput="updateLivePreview()"
+                                                spellcheck="false"
+                                            ></textarea>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Right Panel - Desktop Customization -->
+                <!-- Right Panel - Component Info & Actions -->
                 <div class="hidden lg:block w-80 border-l border-white/20 flex flex-col">
                     <div class="p-6 border-b border-white/20">
-                        <h4 class="text-lg font-semibold">Customize Component</h4>
-                        <p class="text-gray-400 text-sm mt-1">Adjust properties and see live changes</p>
+                        <h4 class="text-lg font-semibold">Component Details</h4>
+                        <p class="text-gray-400 text-sm mt-1">Information and quick actions</p>
                     </div>
                     
                     <div class="flex-1 overflow-y-auto p-6">
-                        <div class="space-y-6" id="customizationPanel">
-                            <!-- Customization controls will be added here -->
+                        <div class="space-y-6">
+                            <!-- Component Tags -->
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-300 mb-3">Tags</h5>
+                                <div class="flex flex-wrap gap-2" id="componentTags">
+                                    <!-- Tags will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Component Stats -->
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-300 mb-3">Statistics</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Likes:</span>
+                                        <span id="sidebarLikes">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Views:</span>
+                                        <span>1.2k</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-400">Downloads:</span>
+                                        <span>89</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Actions -->
+                            <div>
+                                <h5 class="text-sm font-semibold text-gray-300 mb-3">Quick Actions</h5>
+                                <div class="space-y-2">
+                                    <button onclick="forkComponent()" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm flex items-center space-x-2">
+                                        <span>🍴</span>
+                                        <span>Fork Component</span>
+                                    </button>
+                                    <button onclick="shareComponent()" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm flex items-center space-x-2">
+                                        <span>📤</span>
+                                        <span>Share Component</span>
+                                    </button>
+                                    <button onclick="reportComponent()" class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors text-sm flex items-center space-x-2">
+                                        <span>⚠️</span>
+                                        <span>Report Issue</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Customization Actions -->
+                    <!-- Action Buttons -->
                     <div class="p-6 border-t border-white/20 space-y-3">
-                        <button onclick="resetCustomization()" class="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors text-sm">
-                            🔄 Reset to Default
+                        <button onclick="downloadComponent()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm flex items-center justify-center space-x-2">
+                            <span>⬇️</span>
+                            <span>Download Component</span>
                         </button>
-                        <button onclick="saveCustomization()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm">
-                            💾 Save Custom Version
+                        <button onclick="addToCollection()" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors text-sm flex items-center justify-center space-x-2">
+                            <span>📁</span>
+                            <span>Add to Collection</span>
                         </button>
                     </div>
                 </div>
@@ -488,7 +624,7 @@
             {
                 id: 1,
                 name: "Gradient Button",
-                category: "button", // Changed to tag-like category
+                category: "button",
                 tags: ["button", "gradient", "animated"],
                 author: "Sarah Chen",
                 likes: 42,
@@ -503,7 +639,7 @@
             {
                 id: 2,
                 name: "Glass Card",
-                category: "card", // Changed to tag-like category
+                category: "card",
                 tags: ["card", "glass", "modern"],
                 author: "Alex Kumar",
                 likes: 38,
@@ -521,7 +657,7 @@
             {
                 id: 3,
                 name: "Animated Input",
-                category: "form", // Changed to tag-like category
+                category: "form",
                 tags: ["input", "form", "animated", "floating"],
                 author: "Maria Rodriguez",
                 likes: 56,
@@ -538,7 +674,7 @@
             {
                 id: 4,
                 name: "Modern Toggle",
-                category: "form", // Changed to tag-like category
+                category: "form",
                 tags: ["toggle", "switch", "modern"],
                 author: "David Park",
                 likes: 29,
@@ -557,8 +693,10 @@
         let currentSearch = '';
         let currentComponent = null;
         let currentTab = 'preview';
+        let currentEditorTab = 'html';
         let originalComponent = null;
         let previewTheme = 'dark';
+        let editorPreviewTheme = 'dark';
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
@@ -567,7 +705,11 @@
         });
 
         function setupEventHandlers() {
-            // Removed custom category div logic as it's no longer needed
+            // Password strength checker
+            const passwordInput = document.getElementById('signupPassword');
+            if (passwordInput) {
+                passwordInput.addEventListener('input', checkPasswordStrength);
+            }
         }
 
         // Auth functions
@@ -624,7 +766,7 @@
                 showNotification('✅ Login successful! Welcome back!');
                 closeLoginModal();
                 // Update UI to show logged in state
-                updateUIForLoggedInUser('John Doe'); // Replace with actual user data
+                updateUIForLoggedInUser('John Doe');
             }, 1500);
         }
 
@@ -649,18 +791,15 @@
             // Simulate signup process
             showNotification('✨ Creating your account...');
             
-            // In a real app, you'd make an API call here
             setTimeout(() => {
                 showNotification('🎉 Account created successfully! Welcome to ComponentHub!');
                 closeSignupModal();
-                // Update UI to show logged in state
                 updateUIForLoggedInUser(name);
             }, 2000);
         }
 
         function loginWithProvider(provider) {
             showNotification(`🚀 Redirecting to ${provider}...`);
-            // In a real app, you'd redirect to OAuth provider
             setTimeout(() => {
                 showNotification(`✅ Successfully logged in with ${provider}!`);
                 closeLoginModal();
@@ -670,7 +809,6 @@
 
         function signupWithProvider(provider) {
             showNotification(`🚀 Redirecting to ${provider}...`);
-            // In a real app, you'd redirect to OAuth provider
             setTimeout(() => {
                 showNotification(`🎉 Successfully signed up with ${provider}!`);
                 closeSignupModal();
@@ -679,7 +817,6 @@
         }
 
         function updateUIForLoggedInUser(userName) {
-            // Update navigation to show user profile
             const authButtons = document.querySelector('.flex.items-center.space-x-4');
             authButtons.innerHTML = `
                 <button onclick="showUploadModal()" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-6 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105">
@@ -706,22 +843,15 @@
 
         function toggleUserMenu() {
             const menu = document.getElementById('userMenu');
-            menu.classList.toggle('hidden');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
         }
 
         function logout() {
             showNotification('👋 Logged out successfully!');
-            // Reset UI to logged out state
             location.reload();
         }
-
-        // Password strength checker
-        document.addEventListener('DOMContentLoaded', function() {
-            const passwordInput = document.getElementById('signupPassword');
-            if (passwordInput) {
-                passwordInput.addEventListener('input', checkPasswordStrength);
-            }
-        });
 
         function checkPasswordStrength() {
             const password = document.getElementById('signupPassword').value;
@@ -758,49 +888,36 @@
                 case 0:
                 case 1:
                     level = 'Weak';
-                    strengthBars[0].classList.add('bg-red-500');
+                    if (strengthBars[0]) strengthBars[0].classList.add('bg-red-500');
                     break;
                 case 2:
                     level = 'Fair';
-                    strengthBars[0].classList.add('bg-yellow-500');
-                    strengthBars[1].classList.add('bg-yellow-500');
+                    if (strengthBars[0]) strengthBars[0].classList.add('bg-yellow-500');
+                    if (strengthBars[1]) strengthBars[1].classList.add('bg-yellow-500');
                     break;
                 case 3:
                     level = 'Good';
-                    strengthBars[0].classList.add('bg-blue-500');
-                    strengthBars[1].classList.add('bg-blue-500');
-                    strengthBars[2].classList.add('bg-blue-500');
+                    if (strengthBars[0]) strengthBars[0].classList.add('bg-blue-500');
+                    if (strengthBars[1]) strengthBars[1].classList.add('bg-blue-500');
+                    if (strengthBars[2]) strengthBars[2].classList.add('bg-blue-500');
                     break;
                 case 4:
                     level = 'Strong';
-                    strengthBars.forEach(bar => bar.classList.add('bg-green-500'));
+                    strengthBars.forEach(bar => {
+                        if (bar) bar.classList.add('bg-green-500');
+                    });
                     break;
             }
             
-            strengthText.textContent = level;
+            if (strengthText) {
+                strengthText.textContent = level;
+            }
         }
-
-        // Close modals when clicking outside
-        document.addEventListener('click', function(event) {
-            const loginModal = document.getElementById('loginModal');
-            const signupModal = document.getElementById('signupModal');
-            const userMenu = document.getElementById('userMenu');
-            
-            if (event.target === loginModal) {
-                closeLoginModal();
-            }
-            if (event.target === signupModal) {
-                closeSignupModal();
-            }
-            if (userMenu && !event.target.closest('.relative') && !userMenu.classList.contains('hidden')) {
-                userMenu.classList.add('hidden');
-            }
-        });
 
         function renderComponents() {
             const grid = document.getElementById('componentsGrid');
             const filteredComponents = components.filter(component => {
-                const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter); // Updated filter logic
+                const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter);
                 const matchesSearch = currentSearch === '' || 
                     component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
                     component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
@@ -863,7 +980,6 @@
             const html = document.getElementById('componentHTML').value;
             const css = document.getElementById('componentCSS').value;
             
-            // Determine category from the first tag, or default to 'custom'
             const category = tags.length > 0 ? tags[0] : 'custom'; 
             
             const newComponent = {
@@ -885,22 +1001,20 @@
             // Reset form
             event.target.reset();
             
-            // Show success animation
             showNotification('Component uploaded successfully! 🎉');
         }
 
         function openComponentModal(componentId) {
             currentComponent = components.find(c => c.id === componentId);
-            originalComponent = JSON.parse(JSON.stringify(currentComponent)); // Deep copy
+            originalComponent = JSON.parse(JSON.stringify(currentComponent));
             const modal = document.getElementById('componentModal');
-            const preview = document.getElementById('componentPreview');
             const nameEl = document.getElementById('modalComponentName');
             const authorEl = document.getElementById('modalComponentAuthor');
             const likesEl = document.getElementById('modalComponentLikes');
             
-            nameEl.textContent = currentComponent.name;
-            authorEl.textContent = `by ${currentComponent.author}`;
-            likesEl.textContent = currentComponent.likes;
+            if (nameEl) nameEl.textContent = currentComponent.name;
+            if (authorEl) authorEl.textContent = `by ${currentComponent.author}`;
+            if (likesEl) likesEl.textContent = currentComponent.likes;
             
             // Switch to preview tab by default
             switchTab('preview');
@@ -909,14 +1023,13 @@
             updateComponentPreview();
             updateCodeSnippet();
             
-            // Setup customization panel
-            setupCustomizationPanel();
-            
             modal.classList.remove('hidden');
         }
 
         function updateComponentPreview() {
             const preview = document.getElementById('componentPreview');
+            if (!preview) return;
+            
             let componentHTML = currentComponent.html;
             if (currentComponent.css) {
                 componentHTML = `<style>${currentComponent.css}</style>${componentHTML}`;
@@ -926,22 +1039,21 @@
 
         function updateCodeSnippet() {
             const codeEl = document.getElementById('codeSnippet');
+            if (!codeEl) return;
+            
             let fullCode = '';
             
-            // Combine HTML and CSS into a complete snippet
             if (currentComponent.css && currentComponent.css.trim()) {
                 fullCode += `<style>\n${currentComponent.css}\n</style>\n\n`;
             }
             
             fullCode += currentComponent.html;
             
-            // Add syntax highlighting classes and format
-            const formattedCode = formatCode(fullCode);
+            const formattedCode = formatCodeForDisplay(fullCode);
             codeEl.innerHTML = formattedCode;
         }
 
-        function formatCode(code) {
-            // Simple code formatting - in production you'd use a proper syntax highlighter
+        function formatCodeForDisplay(code) {
             return code
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -953,11 +1065,28 @@
         function switchTab(tabName) {
             currentTab = tabName;
             
+            // Map tab names to proper IDs
+            const tabIdMap = {
+                'preview': 'previewTab',
+                'code': 'codeTab',
+                'liveEditor': 'liveEditorTab'
+            };
+            
+            const contentIdMap = {
+                'preview': 'previewContent',
+                'code': 'codeContent',
+                'liveEditor': 'liveEditorContent'
+            };
+            
             // Update tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            const activeTabBtn = document.getElementById(tabIdMap[tabName]);
+            if (activeTabBtn) {
+                activeTabBtn.classList.add('active');
+            }
             
             // Update tab content
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -965,18 +1094,261 @@
                 content.style.display = 'none';
             });
             
-            const activeContent = document.getElementById(`${tabName}Content`);
-            activeContent.classList.add('active');
-            activeContent.style.display = 'block';
+            const activeContent = document.getElementById(contentIdMap[tabName]);
+            if (activeContent) {
+                activeContent.classList.add('active');
+                activeContent.style.display = 'block';
+            }
             
-            // Update code when switching to code tab
+            // Update content based on tab
             if (tabName === 'code') {
                 updateCodeSnippet();
+            } else if (tabName === 'liveEditor') {
+                initializeLiveEditor();
             }
         }
 
+        // Live Editor Functions
+        function initializeLiveEditor() {
+            const htmlEditor = document.getElementById('htmlEditor');
+            const cssEditor = document.getElementById('cssEditor');
+            
+            if (htmlEditor) htmlEditor.value = currentComponent.html || '';
+            if (cssEditor) cssEditor.value = currentComponent.css || '';
+            
+            updateLivePreview();
+            updateComponentSidebar();
+        }
+
+        function switchEditorTab(tabName) {
+            currentEditorTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.editor-tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-400');
+                btn.classList.add('border-transparent', 'text-gray-400');
+            });
+            
+            const activeTab = document.getElementById(`${tabName}EditorTab`);
+            if (activeTab) {
+                activeTab.classList.add('active', 'border-blue-500', 'text-blue-400');
+                activeTab.classList.remove('border-transparent', 'text-gray-400');
+            }
+            
+            // Update content
+            document.querySelectorAll('.editor-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+            
+            const activeContent = document.getElementById(`${tabName}EditorContent`);
+            if (activeContent) {
+                activeContent.classList.add('active');
+                activeContent.style.display = 'block';
+            }
+            
+            // Focus the active editor
+            const activeEditor = document.getElementById(`${tabName}Editor`);
+            if (activeEditor) {
+                setTimeout(() => activeEditor.focus(), 100);
+            }
+        }
+
+        function updateLivePreview() {
+            const htmlCode = document.getElementById('htmlEditor')?.value || '';
+            const cssCode = document.getElementById('cssEditor')?.value || '';
+            const preview = document.getElementById('livePreview');
+            const errorDiv = document.getElementById('previewError');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (!preview) return;
+            
+            try {
+                // Hide error display
+                if (errorDiv) errorDiv.classList.add('hidden');
+                preview.style.display = 'block';
+                
+                // Create complete HTML with CSS
+                let completeHTML = htmlCode;
+                if (cssCode.trim()) {
+                    completeHTML = `<style>${cssCode}</style>${htmlCode}`;
+                }
+                
+                // Update the preview
+                preview.innerHTML = completeHTML;
+                
+                // Update current component for other functions
+                currentComponent.html = htmlCode;
+                currentComponent.css = cssCode;
+                
+            } catch (error) {
+                // Show error in preview
+                preview.style.display = 'none';
+                if (errorDiv) errorDiv.classList.remove('hidden');
+                if (errorMessage) errorMessage.textContent = error.message || 'Invalid HTML/CSS syntax';
+            }
+        }
+
+        function toggleEditorPreviewTheme() {
+            const container = document.getElementById('livePreviewContainer');
+            if (!container) return;
+            
+            editorPreviewTheme = editorPreviewTheme === 'dark' ? 'light' : 'dark';
+            
+            if (editorPreviewTheme === 'light') {
+                container.className = container.className.replace('from-slate-800 to-slate-900', 'from-gray-100 to-gray-200');
+                container.style.color = '#1f2937';
+            } else {
+                container.className = container.className.replace('from-gray-100 to-gray-200', 'from-slate-800 to-slate-900');
+                container.style.color = '#ffffff';
+            }
+        }
+
+        function resetLiveEditor() {
+            const htmlEditor = document.getElementById('htmlEditor');
+            const cssEditor = document.getElementById('cssEditor');
+            
+            if (htmlEditor) htmlEditor.value = originalComponent.html || '';
+            if (cssEditor) cssEditor.value = originalComponent.css || '';
+            
+            currentComponent.html = originalComponent.html;
+            currentComponent.css = originalComponent.css;
+            updateLivePreview();
+            showNotification('🔄 Live editor reset to original');
+        }
+
+        function formatCode() {
+            const htmlEditor = document.getElementById('htmlEditor');
+            const cssEditor = document.getElementById('cssEditor');
+            
+            if (!htmlEditor || !cssEditor) return;
+            
+            // Simple formatting - in production you'd use a proper formatter
+            if (currentEditorTab === 'html') {
+                const formatted = formatHTML(htmlEditor.value);
+                htmlEditor.value = formatted;
+            } else {
+                const formatted = formatCSS(cssEditor.value);
+                cssEditor.value = formatted;
+            }
+            
+            updateLivePreview();
+            showNotification('✨ Code formatted successfully!');
+        }
+
+        function formatHTML(html) {
+            // Simple HTML formatting
+            return html
+                .replace(/></g, '>\n<')
+                .replace(/^\s+|\s+$/g, '')
+                .split('\n')
+                .map((line, index) => {
+                    const depth = (line.match(/^<[^\/]/g) || []).length;
+                    const indent = '  '.repeat(Math.max(0, depth - 1));
+                    return indent + line.trim();
+                })
+                .join('\n');
+        }
+
+        function formatCSS(css) {
+            // Simple CSS formatting
+            return css
+                .replace(/\{/g, ' {\n  ')
+                .replace(/\}/g, '\n}\n')
+                .replace(/;/g, ';\n  ')
+                .replace(/,/g, ',\n')
+                .replace(/\n\s*\n/g, '\n')
+                .trim();
+        }
+
+        function copyCompleteCode() {
+            const htmlCode = document.getElementById('htmlEditor')?.value || '';
+            const cssCode = document.getElementById('cssEditor')?.value || '';
+            
+            let completeCode = '';
+            if (cssCode.trim()) {
+                completeCode += `<style>\n${cssCode}\n</style>\n\n`;
+            }
+            completeCode += htmlCode;
+            
+            navigator.clipboard.writeText(completeCode).then(() => {
+                showNotification('📋 Complete code copied to clipboard!');
+            });
+        }
+
+        function resetEditorCode() {
+            if (currentEditorTab === 'html') {
+                const htmlEditor = document.getElementById('htmlEditor');
+                if (htmlEditor) htmlEditor.value = originalComponent.html || '';
+            } else {
+                const cssEditor = document.getElementById('cssEditor');
+                if (cssEditor) cssEditor.value = originalComponent.css || '';
+            }
+            updateLivePreview();
+            showNotification('🔄 Editor reset to original');
+        }
+
+        function updateComponentSidebar() {
+            const tagsContainer = document.getElementById('componentTags');
+            const likesElement = document.getElementById('sidebarLikes');
+            
+            // Update tags
+            if (currentComponent.tags && tagsContainer) {
+                tagsContainer.innerHTML = currentComponent.tags.map(tag => 
+                    `<span class="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded">#${tag}</span>`
+                ).join('');
+            }
+            
+            // Update likes
+            if (likesElement) {
+                likesElement.textContent = currentComponent.likes || 0;
+            }
+        }
+
+        // Additional component actions
+        function forkComponent() {
+            const forkedComponent = {
+                ...currentComponent,
+                id: components.length + 1,
+                name: `${currentComponent.name} (Fork)`,
+                author: "You",
+                likes: 0
+            };
+            
+            components.unshift(forkedComponent);
+            renderComponents();
+            showNotification('🍴 Component forked successfully!');
+        }
+
+        function shareComponent() {
+            const shareData = {
+                title: currentComponent.name,
+                text: `Check out this amazing component: ${currentComponent.name} by ${currentComponent.author}`,
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                navigator.share(shareData);
+            } else {
+                // Fallback - copy link to clipboard
+                navigator.clipboard.writeText(shareData.url).then(() => {
+                    showNotification('📤 Component link copied to clipboard!');
+                });
+            }
+        }
+
+        function reportComponent() {
+            showNotification('⚠️ Report submitted. Thank you for helping improve the community!');
+        }
+
+        function addToCollection() {
+            showNotification('📁 Component added to your collection!');
+        }
+
         function togglePreviewTheme() {
-            const preview = document.getElementById('componentPreview').parentElement;
+            const preview = document.getElementById('componentPreview')?.parentElement;
+            if (!preview) return;
+            
             previewTheme = previewTheme === 'dark' ? 'light' : 'dark';
             
             if (previewTheme === 'light') {
@@ -990,12 +1362,19 @@
 
         function centerComponent() {
             const preview = document.getElementById('componentPreview');
-            preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (preview) {
+                preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
         function likeComponent() {
+            if (!currentComponent) return;
+            
             currentComponent.likes++;
-            document.getElementById('modalComponentLikes').textContent = currentComponent.likes;
+            const modalLikes = document.getElementById('modalComponentLikes');
+            if (modalLikes) {
+                modalLikes.textContent = currentComponent.likes;
+            }
             
             // Update in main components array
             const mainComponent = components.find(c => c.id === currentComponent.id);
@@ -1003,129 +1382,22 @@
                 mainComponent.likes = currentComponent.likes;
             }
             
+            // Update sidebar
+            updateComponentSidebar();
+            
             // Update main grid if visible
             renderComponents();
             
             showNotification('❤️ Component liked!');
         }
 
-        function resetCustomization() {
-            currentComponent = JSON.parse(JSON.stringify(originalComponent));
-            updateComponentPreview();
-            updateCodeSnippet();
-            setupCustomizationPanel();
-            showNotification('🔄 Reset to original');
-        }
-
-        function saveCustomization() {
-            // In a real app, this would save to the user's collection
-            const customName = `${originalComponent.name} (Custom)`;
-            const customComponent = {
-                ...currentComponent,
-                id: components.length + 1,
-                name: customName,
-                author: "You",
-                likes: 0
-            };
-            
-            components.unshift(customComponent);
-            renderComponents();
-            showNotification('💾 Custom version saved!');
-        }
-
         function closeComponentModal() {
             document.getElementById('componentModal').classList.add('hidden');
         }
 
-        function setupCustomizationPanel() {
-            const panel = document.getElementById('customizationPanel');
-            const mobilePanel = document.getElementById('mobileCustomizationPanel');
-            const customizable = currentComponent.customizable;
-            
-            if (!customizable || Object.keys(customizable).length === 0) {
-                const noCustomMsg = '<p class="text-gray-400 text-center py-8">No customization options available for this component</p>';
-                panel.innerHTML = noCustomMsg;
-                if (mobilePanel) mobilePanel.innerHTML = noCustomMsg;
-                return;
-            }
-            
-            let controlsHTML = '';
-            
-            Object.entries(customizable).forEach(([key, values]) => {
-                if (Array.isArray(values)) {
-                    controlsHTML += `
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-300 capitalize">${key.replace(/([A-Z])/g, ' $1')}</label>
-                            <select onchange="updateComponent('${key}', this.value)" class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                                ${values.map((value, index) => `<option value="${value}" ${index === 0 ? 'selected' : ''}>${formatOptionLabel(key, value)}</option>`).join('')}
-                            </select>
-                        </div>
-                    `;
-                } else if (typeof values === 'string') {
-                    controlsHTML += `
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-300 capitalize">${key.replace(/([A-Z])/g, ' $1')}</label>
-                            <input type="text" value="${values}" onchange="updateComponent('${key}', this.value)" class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
-                        </div>
-                    `;
-                }
-            });
-            
-            panel.innerHTML = controlsHTML;
-            if (mobilePanel) mobilePanel.innerHTML = controlsHTML;
-        }
-
-        function formatOptionLabel(key, value) {
-            // Format option labels to be more user-friendly
-            if (key === 'colors') {
-                return value.replace(/from-(\w+)-\d+\s+to-(\w+)-\d+/, '$1 to $2');
-            } else if (key === 'sizes') {
-                if (value.includes('text-sm')) return 'Small';
-                if (value.includes('text-lg')) return 'Large';
-                return 'Medium';
-            } else if (key === 'opacity') {
-                return value.replace('bg-white/', '') + '% opacity';
-            } else if (key === 'blur') {
-                return value.replace('backdrop-blur-', '').replace('sm', 'light').replace('md', 'medium').replace('lg', 'heavy');
-            }
-            return value;
-        }
-
-        function updateComponent(property, value) {
-            const preview = document.getElementById('componentPreview');
-            let html = currentComponent.html;
-            
-            // Simple customization logic - in a real app, this would be more sophisticated
-            if (property === 'colors' && html.includes('bg-gradient-to-r')) {
-                html = html.replace(/from-\w+-\d+\s+to-\w+-\d+/g, value);
-            } else if (property === 'sizes' && html.includes('px-')) {
-                html = html.replace(/px-\d+\s+py-\d+(\s+text-\w+)?/g, value);
-            } else if (property === 'text') {
-                html = html.replace(/>([^<]+)</g, `>${value}<`);
-            } else if (property === 'title') {
-                html = html.replace(/>([^<]+)</g, `>${value}<`);
-            } else if (property === 'label') {
-                // This regex specifically targets the bg-slate-900 class within the label's class attribute
-                html = html.replace(/(<label for="[^"]+?" class="[^"]*?)bg-slate-900(\s*text-sm text-gray-400[^"]*?">)/g, '$1$2');
-            } else if (property === 'opacity') {
-                html = html.replace(/bg-white\/\d+/g, value);
-            } else if (property === 'blur') {
-                html = html.replace(/backdrop-blur-\w+/g, value);
-            }
-            
-            // Update current component
-            currentComponent.html = html;
-            
-            // Update preview
-            updateComponentPreview();
-            
-            // Update code snippet if code tab is active
-            if (currentTab === 'code') {
-                updateCodeSnippet();
-            }
-        }
-
         function copyCode() {
+            if (!currentComponent) return;
+            
             let fullCode = '';
             
             if (currentComponent.css && currentComponent.css.trim()) {
@@ -1140,6 +1412,8 @@
         }
 
         function downloadComponent() {
+            if (!currentComponent) return;
+            
             let content = '';
             
             if (currentComponent.css && currentComponent.css.trim()) {
@@ -1171,6 +1445,23 @@
                 notification.remove();
             }, 3000);
         }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const loginModal = document.getElementById('loginModal');
+            const signupModal = document.getElementById('signupModal');
+            const userMenu = document.getElementById('userMenu');
+            
+            if (event.target === loginModal) {
+                closeLoginModal();
+            }
+            if (event.target === signupModal) {
+                closeSignupModal();
+            }
+            if (userMenu && !event.target.closest('.relative') && !userMenu.classList.contains('hidden')) {
+                userMenu.classList.add('hidden');
+            }
+        });
 
         // Add some smooth scrolling and animations
         document.addEventListener('scroll', function() {
