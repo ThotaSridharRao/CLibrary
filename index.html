@@ -948,7 +948,11 @@
             const likesEl = document.getElementById('modalComponentLikes');
             
             if (nameEl) nameEl.textContent = currentComponent.name;
-            if (authorEl) authorEl.textContent = `by ${currentComponent.author}`;
+            if (authorEl) {
+                const isCurrentUser = currentUser && currentComponent.author._id === currentUser.id;
+                authorEl.textContent = `by ${isCurrentUser ? 'You' : currentComponent.author.name}`;
+            }
+
             if (likesEl) likesEl.textContent = currentComponent.likes;
             
             // Switch to preview tab by default
@@ -956,7 +960,8 @@
             
             // Render component with styles
             updateComponentPreview();
-            updateCodeSnippet();
+            switchFormat('html');
+
             
             modal.classList.remove('hidden');
         }
