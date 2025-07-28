@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ComponentHub - Modern Component Library</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -1029,15 +1033,40 @@
 
 
         function updateComponentPreview() {
-            const preview = document.getElementById('componentPreview');
-            if (!preview) return;
-            
-            let componentHTML = currentComponent.html;
-            if (currentComponent.css) {
-                componentHTML = `<style>${currentComponent.css}</style>${componentHTML}`;
+            const preview = document.getElementById("componentPreview");
+            preview.innerHTML = ""; // clear previous
+
+            const code = currentComponent.html || "";
+
+            const isJSX = code.includes("export default") || code.includes("return (");
+
+            if (isJSX) {
+                // Create a container div for React to mount into
+                const mountPoint = document.createElement("div");
+                mountPoint.id = "reactPreviewMount";
+                preview.appendChild(mountPoint);
+
+                // Transpile JSX using Babel
+                try {
+                const compiledCode = Babel.transform(code, {
+                    presets: ["react"]
+                }).code;
+
+                // Eval transpiled component & mount
+                const exports = {};
+                eval(compiledCode); // defines default export
+                const Component = exports.default;
+
+                ReactDOM.createRoot(mountPoint).render(React.createElement(Component));
+                } catch (err) {
+                preview.innerHTML = `<div class="text-red-500 text-sm p-2">❌ React render error: ${err.message}</div>`;
+                }
+            } else {
+                // Plain HTML fallback
+                preview.innerHTML = code + `<style>${currentComponent.css || ""}</style>`;
             }
-            preview.innerHTML = componentHTML;
         }
+
 
         function updateCodeSnippet() {
             const codeEl = document.getElementById('codeSnippet');
