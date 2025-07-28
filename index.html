@@ -438,10 +438,18 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Code Content -->
-                                <div class="h-full overflow-auto">
-                                    <pre class="h-full"><code id="codeSnippet" class="block p-6 text-sm font-mono text-gray-300 whitespace-pre-wrap"></code></pre>
+                                <!-- Code Tab Format Selector -->
+                                <div class="flex space-x-4 border-b border-slate-700 px-4 pt-4 pb-2">
+                                    <button class="format-btn active" onclick="switchFormat('html')">🧾 HTML + CSS</button>
+                                    <button class="format-btn" onclick="switchFormat('react')">⚛️ React</button>
+                                    <button class="format-btn" onclick="switchFormat('vue')">🧩 Vue</button>
                                 </div>
+
+                                <!-- Code Viewer -->
+                                <div class="p-6 overflow-auto h-full bg-slate-900 rounded-b-xl">
+                                    <pre class="text-sm text-white whitespace-pre-wrap" id="formatCodeBlock"></pre>
+                                </div>
+
                             </div>
                         </div>
 
@@ -1048,17 +1056,50 @@
             }
         }
 
-        // Live Editor Functions
-        function initializeLiveEditor() {
-            const htmlEditor = document.getElementById('htmlEditor');
-            const cssEditor = document.getElementById('cssEditor');
-            
-            if (htmlEditor) htmlEditor.value = currentComponent.html || '';
-            if (cssEditor) cssEditor.value = currentComponent.css || '';
-            
-            updateLivePreview();
-            updateComponentSidebar();
+        function switchFormat(format) {
+            const buttons = document.querySelectorAll(".format-btn");
+            buttons.forEach(btn => btn.classList.remove("active"));
+            document.querySelector(`.format-btn[onclick="switchFormat('${format}')"]`).classList.add("active");
+
+            let html = currentComponent.html || "";
+            let css = currentComponent.css || "";
+            let formatted = "";
+
+            if (format === "html") {
+                formatted = `<style>\n${css}\n</style>\n\n${html}`;
+            } else if (format === "react") {
+                formatted = `
+        function MyComponent() {
+        return (
+            <>
+        ${toJSX(html).split("\n").map(line => "      " + line).join("\n")}
+            </>
+        );
+        }`.trim();
+            } else if (format === "vue") {
+                formatted = `
+        <template>
+        ${html}
+        </template>
+
+        <style scoped>
+        ${css}
+        </style>
+        `.trim();
+            }
+
+            document.getElementById("formatCodeBlock").textContent = formatted;
         }
+
+        function toJSX(html) {
+            return html
+                .replace(/class=/g, "className=")
+                .replace(/for=/g, "htmlFor=")
+                .replace(/<(img|input)([^>]*?)(?<!\/)>/g, "<$1$2 />");
+        }
+
+
+        
 
         function switchEditorTab(tabName) {
             currentEditorTab = tabName;
