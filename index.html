@@ -966,8 +966,8 @@
             const filteredComponents = components.filter(component => {
                 const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter);
                 const matchesSearch = currentSearch === '' || 
-                    component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
-                    component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
+                component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
                 return matchesCategory && matchesSearch;
             });
 
@@ -976,54 +976,47 @@
                 card.className = "glass-morphism rounded-xl p-6 hover:bg-white/20 transition-all duration-300 cursor-pointer transform hover:scale-105 animate-fade-in";
                 card.setAttribute("onclick", `openComponentModal('${component._id}')`);
 
-                // 📦 Fixed-size preview container
                 const previewWrapper = document.createElement("div");
-                previewWrapper.className = "component-preview w-[300px] h-[200px] overflow-hidden bg-white border border-white/10 rounded-lg mb-4 flex items-center justify-center";
-
-                // 📦 Inner zoomed container
-                const scaledPreview = document.createElement("div");
-                scaledPreview.className = "transform scale-[0.5] origin-top-left";
+                previewWrapper.className = "component-preview rounded-lg p-4 mb-4 min-h-[120px] flex items-center justify-center";
 
                 const code = component.html || "";
                 const isJSX = code.includes("export default") || code.includes("return (");
 
                 if (isJSX) {
-                    const mount = document.createElement("div");
-                    scaledPreview.appendChild(mount);
+                const mount = document.createElement("div");
+                previewWrapper.appendChild(mount);
 
-                    try {
-                        const jsxCode = code.replace(/export\s+default\s+function\s+(\w+)/, 'function $1') +
-                                        `\nconst Component = ${RegExp.$1};`;
+                try {
+                    const jsxCode = code.replace(/export\s+default\s+function\s+(\w+)/, 'function $1') +
+                                    `\nconst Component = ${RegExp.$1};`;
 
-                        const compiled = Babel.transform(jsxCode, { presets: ["react"] }).code;
-                        const Component = new Function(`${compiled}; return Component;`)();
+                    const compiled = Babel.transform(jsxCode, { presets: ["react"] }).code;
+                    const Component = new Function(`${compiled}; return Component;`)();
 
-                        ReactDOM.createRoot(mount).render(React.createElement(Component));
-                    } catch (err) {
-                        scaledPreview.innerHTML = `<div class="text-red-500 text-xs">⚠️ JSX error</div>`;
-                    }
+                    ReactDOM.createRoot(mount).render(React.createElement(Component));
+                } catch (err) {
+                    previewWrapper.innerHTML = `<div class="text-red-500 text-xs">⚠️ JSX error</div>`;
+                }
                 } else {
-                    scaledPreview.innerHTML = code + `<style>${component.css || ""}</style>`;
+                previewWrapper.innerHTML = code + `<style>${component.css || ""}</style>`;
                 }
 
-                previewWrapper.appendChild(scaledPreview);
-
-                // 👤 Author & Tag Info
+                // Inner HTML below preview
                 const details = `
-                    <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
-                    <p class="text-gray-400 text-sm mb-3">
-                        👤 ${currentUser && component.author._id === currentUser.id ? 'You' : component.author.name}
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <div class="flex flex-wrap gap-1">
-                            ${component.tags.map(tag => `
-                                <span class="text-xs text-blue-300 bg-blue-900/20 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-800/30 transition"
-                                    onclick="filterComponentsByTag('${tag}')">#${tag}</span>`).join('')}
-                        </div>
-                        <div class="flex items-center text-sm text-gray-400">
-                            <span class="mr-1">❤️</span> ${component.likes}
-                        </div>
+                <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
+                <p class="text-gray-400 text-sm mb-3">
+                    👤 ${currentUser && component.author._id === currentUser.id ? 'You' : component.author.name}
+                </p>
+                <div class="flex items-center justify-between">
+                    <div class="flex flex-wrap gap-1">
+                    ${component.tags.map(tag => `
+                        <span class="text-xs text-blue-300 bg-blue-900/20 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-800/30 transition"
+                        onclick="filterComponentsByTag('${tag}')">#${tag}</span>`).join('')}
                     </div>
+                    <div class="flex items-center text-sm text-gray-400">
+                    <span class="mr-1">❤️</span> ${component.likes}
+                    </div>
+                </div>
                 `;
 
                 const detailsEl = document.createElement("div");
@@ -1034,6 +1027,7 @@
                 grid.appendChild(card);
             });
         }
+
 
 
         function openComponentModal(componentId) {
