@@ -1034,29 +1034,27 @@
 
         function updateComponentPreview() {
             const preview = document.getElementById("componentPreview");
-            preview.innerHTML = ""; // clear previous
+            preview.innerHTML = "";
 
             const code = currentComponent.html || "";
-
             const isJSX = code.includes("export default") || code.includes("return (");
 
             if (isJSX) {
-                // Create a container div for React to mount into
                 const mountPoint = document.createElement("div");
                 mountPoint.id = "reactPreviewMount";
                 preview.appendChild(mountPoint);
 
-                // Transpile JSX using Babel
                 try {
-                const compiledCode = Babel.transform(code, {
-                    presets: ["react"]
-                }).code;
+                // ✅ Replace 'export default' with named function 'Component'
+                const jsxCode = code.replace("export default function", "function Component");
 
-                // Eval transpiled component & mount
-                const exports = {};
-                eval(compiledCode); // defines default export
-                const Component = exports.default;
+                // ✅ Compile JSX to JS
+                const compiledCode = Babel.transform(jsxCode, { presets: ["react"] }).code;
 
+                // ✅ Create a function and return the Component
+                const Component = new Function(`${compiledCode}; return Component;`)();
+
+                // ✅ Render the component
                 ReactDOM.createRoot(mountPoint).render(React.createElement(Component));
                 } catch (err) {
                 preview.innerHTML = `<div class="text-red-500 text-sm p-2">❌ React render error: ${err.message}</div>`;
@@ -1066,6 +1064,7 @@
                 preview.innerHTML = code + `<style>${currentComponent.css || ""}</style>`;
             }
         }
+
 
 
         function updateCodeSnippet() {
