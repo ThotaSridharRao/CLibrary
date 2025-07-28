@@ -960,73 +960,80 @@
         }
 
         function renderComponents() {
-            const grid = document.getElementById('componentsGrid');
-            grid.innerHTML = ""; // Clear before appending
+  const grid = document.getElementById('componentsGrid');
+  grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6";
+  grid.innerHTML = "";
 
-            const filteredComponents = components.filter(component => {
-                const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter);
-                const matchesSearch = currentSearch === '' || 
-                component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
-                component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
-                return matchesCategory && matchesSearch;
-            });
+  const filteredComponents = components.filter(component => {
+    const matchesCategory = currentFilter === 'all' || component.tags.includes(currentFilter);
+    const matchesSearch = currentSearch === '' ||
+      component.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+      component.tags.some(tag => tag.toLowerCase().includes(currentSearch.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
-            filteredComponents.forEach(component => {
-                const card = document.createElement("div");
-                card.className = "glass-morphism rounded-xl p-6 hover:bg-white/20 transition-all duration-300 cursor-pointer transform hover:scale-105 animate-fade-in";
-                card.setAttribute("onclick", `openComponentModal('${component._id}')`);
+  filteredComponents.forEach(component => {
+    const card = document.createElement("div");
+    card.className = "bg-white/10 backdrop-blur-md rounded-xl p-4 shadow-md transition-transform transform hover:scale-[1.02] cursor-pointer";
+    card.setAttribute("onclick", `openComponentModal('${component._id}')`);
 
-                const previewWrapper = document.createElement("div");
-                previewWrapper.className = "component-preview rounded-lg p-4 mb-4 min-h-[120px] flex items-center justify-center";
+    // Component Preview Zone
+    const previewWrapper = document.createElement("div");
+    previewWrapper.className = "relative w-full aspect-[4/3] bg-white rounded-lg border border-gray-300 mb-4 overflow-auto p-2";
 
-                const code = component.html || "";
-                const isJSX = code.includes("export default") || code.includes("return (");
+    const contentWrapper = document.createElement("div");
+    contentWrapper.className = "w-full h-full flex items-center justify-center";
 
-                if (isJSX) {
-                const mount = document.createElement("div");
-                previewWrapper.appendChild(mount);
+    const contentBox = document.createElement("div");
+    contentBox.className = "w-full h-full";
 
-                try {
-                    const jsxCode = code.replace(/export\s+default\s+function\s+(\w+)/, 'function $1') +
-                                    `\nconst Component = ${RegExp.$1};`;
+    const code = component.html || "";
+    const isJSX = code.includes("export default") || code.includes("return (");
 
-                    const compiled = Babel.transform(jsxCode, { presets: ["react"] }).code;
-                    const Component = new Function(`${compiled}; return Component;`)();
+    if (isJSX) {
+      const mount = document.createElement("div");
+      contentBox.appendChild(mount);
+      try {
+        const jsxCode = code.replace(/export\s+default\s+function\s+(\w+)/, 'function $1') +
+          `\nconst Component = ${RegExp.$1};`;
+        const compiled = Babel.transform(jsxCode, { presets: ["react"] }).code;
+        const Component = new Function(`${compiled}; return Component;`)();
+        ReactDOM.createRoot(mount).render(React.createElement(Component));
+      } catch (err) {
+        contentBox.innerHTML = `<div class="text-red-500 text-sm">⚠️ JSX Error</div>`;
+      }
+    } else {
+      contentBox.innerHTML = code + `<style>${component.css || ""}</style>`;
+    }
 
-                    ReactDOM.createRoot(mount).render(React.createElement(Component));
-                } catch (err) {
-                    previewWrapper.innerHTML = `<div class="text-red-500 text-xs">⚠️ JSX error</div>`;
-                }
-                } else {
-                previewWrapper.innerHTML = code + `<style>${component.css || ""}</style>`;
-                }
+    contentWrapper.appendChild(contentBox);
+    previewWrapper.appendChild(contentWrapper);
 
-                // Inner HTML below preview
-                const details = `
-                <h3 class="font-semibold text-lg mb-2">${component.name}</h3>
-                <p class="text-gray-400 text-sm mb-3">
-                    👤 ${currentUser && component.author._id === currentUser.id ? 'You' : component.author.name}
-                </p>
-                <div class="flex items-center justify-between">
-                    <div class="flex flex-wrap gap-1">
-                    ${component.tags.map(tag => `
-                        <span class="text-xs text-blue-300 bg-blue-900/20 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-800/30 transition"
-                        onclick="filterComponentsByTag('${tag}')">#${tag}</span>`).join('')}
-                    </div>
-                    <div class="flex items-center text-sm text-gray-400">
-                    <span class="mr-1">❤️</span> ${component.likes}
-                    </div>
-                </div>
-                `;
+    // Info section
+    const info = document.createElement("div");
+    info.innerHTML = `
+      <h3 class="font-semibold text-lg text-white mb-1">${component.name}</h3>
+      <p class="text-sm text-gray-400 mb-3">
+        👤 ${currentUser && component.author._id === currentUser.id ? 'You' : component.author.name}
+      </p>
+      <div class="flex items-center justify-between">
+        <div class="flex flex-wrap gap-1">
+          ${component.tags.map(tag => `
+            <span class="text-xs text-blue-300 bg-blue-900/30 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-800/40 transition"
+              onclick="event.stopPropagation(); filterComponentsByTag('${tag}')">#${tag}</span>`).join('')}
+        </div>
+        <div class="flex items-center text-sm text-gray-400">
+          ❤️ ${component.likes}
+        </div>
+      </div>
+    `;
 
-                const detailsEl = document.createElement("div");
-                detailsEl.innerHTML = details;
+    card.appendChild(previewWrapper);
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+}
 
-                card.appendChild(previewWrapper);
-                card.appendChild(detailsEl);
-                grid.appendChild(card);
-            });
-        }
 
 
 
