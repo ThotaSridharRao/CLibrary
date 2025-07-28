@@ -413,111 +413,23 @@
                             </div>
                         </div>
 
-                        <!-- Code Tab -->
-                        <div id="codeContent" class="tab-content h-full p-6 hidden">
-                            <div class="h-full bg-slate-900 rounded-xl overflow-hidden">
-                                <!-- Code Header -->
-                                <div class="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700">
-                                    <div class="flex items-center space-x-4">
-                                        <span class="text-gray-400 text-sm">Complete Code Snippet</span>
-                                        <div class="flex space-x-1">
-                                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <button onclick="copyCode()" class="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm">
-                                            <span>📋</span>
-                                            <span>Copy</span>
-                                        </button>
-                                        <button onclick="downloadComponent()" class="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm">
-                                            <span>⬇️</span>
-                                            <span>Download</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <!-- Code Content -->
-                                <div class="h-full overflow-auto">
-                                    <pre class="h-full"><code id="codeSnippet" class="block p-6 text-sm font-mono text-gray-300 whitespace-pre-wrap"></code></pre>
-                                </div>
-                            </div>
+                        <!-- Code Tab Format Selector -->
+                        <div class="flex space-x-4 border-b border-slate-700 px-4 pt-4 pb-2">
+                            <button class="format-btn active" onclick="switchFormat('html')">🧾 HTML + CSS</button>
+                            <button class="format-btn" onclick="switchFormat('react')">⚛️ React</button>
+                            <button class="format-btn" onclick="switchFormat('vue')">🧩 Vue</button>
                         </div>
+
+                        <!-- Code Viewer -->
+                        <div class="p-6 overflow-auto h-full bg-slate-900 rounded-b-xl">
+                            <pre class="text-sm text-white whitespace-pre-wrap" id="formatCodeBlock"></pre>
+                        </div>
+
 
                         </div>
                     </div>
                 </div>
                 
-                <!-- Right Panel - Component Info & Actions -->
-                <div class="hidden lg:block w-80 border-l border-white/20 flex flex-col">
-                    <div class="p-6 border-b border-white/20">
-                        <h4 class="text-lg font-semibold">Component Details</h4>
-                        <p class="text-gray-400 text-sm mt-1">Information and quick actions</p>
-                    </div>
-                    
-                    <div class="flex-1 overflow-y-auto p-6">
-                        <div class="space-y-6">
-                            <!-- Component Tags -->
-                            <div>
-                                <h5 class="text-sm font-semibold text-gray-300 mb-3">Tags</h5>
-                                <div class="flex flex-wrap gap-2" id="componentTags">
-                                    <!-- Tags will be populated here -->
-                                </div>
-                            </div>
-                            
-                            <!-- Component Stats -->
-                            <div>
-                                <h5 class="text-sm font-semibold text-gray-300 mb-3">Statistics</h5>
-                                <div class="space-y-2 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-400">Likes:</span>
-                                        <span id="sidebarLikes">0</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-400">Views:</span>
-                                        <span>1.2k</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-400">Downloads:</span>
-                                        <span>89</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Quick Actions -->
-                            <div>
-                                <h5 class="text-sm font-semibold text-gray-300 mb-3">Quick Actions</h5>
-                                <div class="space-y-2">
-                                    <button onclick="forkComponent()" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm flex items-center space-x-2">
-                                        <span>🍴</span>
-                                        <span>Fork Component</span>
-                                    </button>
-                                    <button onclick="shareComponent()" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm flex items-center space-x-2">
-                                        <span>📤</span>
-                                        <span>Share Component</span>
-                                    </button>
-                                    <button onclick="reportComponent()" class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors text-sm flex items-center space-x-2">
-                                        <span>⚠️</span>
-                                        <span>Report Issue</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="p-6 border-t border-white/20 space-y-3">
-                        <button onclick="downloadComponent()" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm flex items-center justify-center space-x-2">
-                            <span>⬇️</span>
-                            <span>Download Component</span>
-                        </button>
-                        <button onclick="addToCollection()" class="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors text-sm flex items-center justify-center space-x-2">
-                            <span>📁</span>
-                            <span>Add to Collection</span>
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -942,60 +854,75 @@
         function openComponentModal(componentId) {
             currentComponent = components.find(c => c._id === componentId);
             originalComponent = JSON.parse(JSON.stringify(currentComponent));
+
             const modal = document.getElementById('componentModal');
             const nameEl = document.getElementById('modalComponentName');
             const authorEl = document.getElementById('modalComponentAuthor');
             const likesEl = document.getElementById('modalComponentLikes');
-            
+
+            // Set modal fields
             if (nameEl) nameEl.textContent = currentComponent.name;
-            if (authorEl) authorEl.textContent = `by ${currentComponent.author}`;
+            if (authorEl) {
+                const isCurrentUser = currentUser && currentComponent.author._id === currentUser.id;
+                authorEl.textContent = `by ${isCurrentUser ? 'You' : currentComponent.author.name}`;
+            }
             if (likesEl) likesEl.textContent = currentComponent.likes;
-            
-            // Switch to preview tab by default
+
+            // Set preview view
             switchTab('preview');
-            
-            // Render component with styles
             updateComponentPreview();
-            updateCodeSnippet();
-            
+
+            // Set default code format
+            switchFormat('html'); // loads into #formatCodeBlock
+
             modal.classList.remove('hidden');
         }
 
-        function updateComponentPreview() {
-            const preview = document.getElementById('componentPreview');
-            if (!preview) return;
-            
-            let componentHTML = currentComponent.html;
-            if (currentComponent.css) {
-                componentHTML = `<style>${currentComponent.css}</style>${componentHTML}`;
+
+        function switchFormat(format) {
+            const buttons = document.querySelectorAll(".format-btn");
+            buttons.forEach(btn => btn.classList.remove("active"));
+            document.querySelector(`.format-btn[onclick="switchFormat('${format}')"]`).classList.add("active");
+
+            let html = currentComponent.html || "";
+            let css = currentComponent.css || "";
+            let formatted = "";
+
+            if (format === "html") {
+                formatted = `<style>\n${css}\n</style>\n\n${html}`;
+            } else if (format === "react") {
+                formatted = `
+            function MyComponent() {
+            return (
+                <>
+            ${toJSX(html).split("\n").map(line => "      " + line).join("\n")}
+                </>
+            );
             }
-            preview.innerHTML = componentHTML;
+            `.trim();
+            } else if (format === "vue") {
+                formatted = `
+            <template>
+            ${html}
+            </template>
+
+            <style scoped>
+            ${css}
+            </style>
+            `.trim();
+            }
+
+            document.getElementById("formatCodeBlock").textContent = formatted;
+            }
+
+            // Simple JSX converter
+            function toJSX(html) {
+            return html
+                .replace(/class=/g, "className=")
+                .replace(/for=/g, "htmlFor=")
+                .replace(/<(img|input)([^>]*?)(?<!\/)>/g, "<$1$2 />");
         }
 
-        function updateCodeSnippet() {
-            const codeEl = document.getElementById('codeSnippet');
-            if (!codeEl) return;
-            
-            let fullCode = '';
-            
-            if (currentComponent.css && currentComponent.css.trim()) {
-                fullCode += `<style>\n${currentComponent.css}\n</style>\n\n`;
-            }
-            
-            fullCode += currentComponent.html;
-            
-            const formattedCode = formatCodeForDisplay(fullCode);
-            codeEl.innerHTML = formattedCode;
-        }
-
-        function formatCodeForDisplay(code) {
-            return code
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
 
         function switchTab(tabName) {
             currentTab = tabName;
@@ -1009,7 +936,7 @@
             
             const contentIdMap = {
                 'preview': 'previewContent',
-                'code': 'codeContent',
+                'id': 'codeContent',
                 'liveEditor': 'liveEditorContent'
             };
             
