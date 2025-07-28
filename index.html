@@ -765,6 +765,17 @@
             showNotification("👋 Logged out successfully");
         }
 
+        function hideElement(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add("hidden");
+        }
+
+        function showElement(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove("hidden");
+        }
+
+
 
         function checkPasswordStrength() {
             const password = document.getElementById('signupPassword').value;
