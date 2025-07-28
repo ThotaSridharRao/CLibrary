@@ -351,26 +351,41 @@
     <div id="componentModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="glass-morphism rounded-2xl max-w-7xl w-full h-[95vh] overflow-hidden">
             <!-- Header -->
-            <div class="flex items-center justify-between p-6 border-b border-white/20">
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <span class="text-white font-bold text-lg">🎨</span>
-                    </div>
-                    <div>
-                        <h3 id="modalComponentName" class="text-2xl font-bold"></h3>
-                        <p id="modalComponentAuthor" class="text-gray-400"></p>
-                    </div>
+            <div class="relative flex items-center justify-between p-6 border-b border-white/20">
+            <!-- Left Side: Icon + Name + Author -->
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <span class="text-white font-bold text-lg">🎨</span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 text-gray-300">
-                        <span>❤️</span>
-                        <span id="modalComponentLikes">0</span>
-                    </div>
-                    <button onclick="likeComponent()" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors">
-                        Like
-                    </button>
-                    <button onclick="closeComponentModal()" class="text-gray-400 hover:text-white text-2xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">&times;</button>
+                <div>
+                <h3 id="modalComponentName" class="text-2xl font-bold"></h3>
+                <p id="modalComponentAuthor" class="text-gray-400"></p>
                 </div>
+            </div>
+
+            <!-- Right Side: Likes, Like Button, Close -->
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 text-gray-300">
+                <span>❤️</span>
+                <span id="modalComponentLikes">0</span>
+                </div>
+                <button onclick="likeComponent()" class="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors">
+                Like
+                </button>
+                <button onclick="closeComponentModal()" class="text-gray-400 hover:text-white text-2xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors">
+                &times;
+                </button>
+            </div>
+
+            <!-- 🗑️ Delete Button (Absolutely Positioned in Top-Right) -->
+            <button
+                id="deleteButtonContainer"
+                onclick="deleteComponent()"
+                class="hidden absolute top-4 right-4 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm shadow transition"
+                title="Delete Component"
+            >
+                🗑️ Delete
+            </button>
             </div>
 
             <div class="flex h-full">
@@ -951,29 +966,40 @@
         function openComponentModal(componentId) {
             currentComponent = components.find(c => c._id === componentId);
             originalComponent = JSON.parse(JSON.stringify(currentComponent));
+
             const modal = document.getElementById('componentModal');
             const nameEl = document.getElementById('modalComponentName');
             const authorEl = document.getElementById('modalComponentAuthor');
             const likesEl = document.getElementById('modalComponentLikes');
-            
+            const deleteBtn = document.getElementById('deleteButtonContainer');
+
+            // Set component name
             if (nameEl) nameEl.textContent = currentComponent.name;
+
+            // Set author label
             if (authorEl) {
                 const isCurrentUser = currentUser && currentComponent.author._id === currentUser.id;
                 authorEl.textContent = `by ${isCurrentUser ? 'You' : currentComponent.author.name}`;
             }
 
+            // Set likes count
             if (likesEl) likesEl.textContent = currentComponent.likes;
-            
-            // Switch to preview tab by default
+
+            // Show delete button only for admin
+            if (deleteBtn) {
+                const isAdmin = currentUser && currentUser.email === 'admin@admin.com';
+                deleteBtn.classList.toggle('hidden', !isAdmin);
+            }
+
+            // Switch to preview tab and render formats
             switchTab('preview');
-            
-            // Render component with styles
             updateComponentPreview();
             switchFormat('html');
 
-            
+            // Show modal
             modal.classList.remove('hidden');
         }
+
 
         function updateComponentPreview() {
             const preview = document.getElementById('componentPreview');
@@ -1104,6 +1130,31 @@
                 .replace(/for=/g, "htmlFor=")
                 .replace(/<(img|input)([^>]*?)(?<!\/)>/g, "<$1$2 />");
         }
+
+        async function deleteComponent() {
+            if (!confirm("Are you sure you want to delete this component?")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/components/${currentComponent._id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${authToken}`
+                }
+                });
+
+                if (!res.ok) throw new Error("Failed to delete component");
+
+                showNotification("🗑️ Component deleted successfully!");
+                closeComponentModal();
+
+                // Remove deleted component from local list and re-render
+                components = components.filter(c => c._id !== currentComponent._id);
+                renderComponents();
+            } catch (err) {
+                showNotification("❌ " + err.message);
+            }
+        }
+
 
 
         
