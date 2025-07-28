@@ -1354,29 +1354,39 @@
             }
         }
 
-        function likeComponent() {
-            if (!currentComponent) return;
-            
-            currentComponent.likes++;
-            const modalLikes = document.getElementById('modalComponentLikes');
-            if (modalLikes) {
-                modalLikes.textContent = currentComponent.likes;
+        async function likeComponent() {
+            if (!currentComponent || !authToken) {
+                showNotification('❌ You must be logged in to like components.');
+                return;
             }
-            
-            // Update in main components array
-            const mainComponent = components.find(c => c._id === currentComponent._id);
-            if (mainComponent) {
-                mainComponent.likes = currentComponent.likes;
+
+            try {
+                const res = await fetch(`${API_BASE}/components/${currentComponent._id}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                    }
+                });
+
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.message || 'Failed to like');
+
+                // Update local state and UI
+                currentComponent.likes = result.likes;
+                const modalLikes = document.getElementById('modalComponentLikes');
+                if (modalLikes) modalLikes.textContent = currentComponent.likes;
+
+                const mainComponent = components.find(c => c._id === currentComponent._id);
+                if (mainComponent) mainComponent.likes = currentComponent.likes;
+
+                updateComponentSidebar();
+                renderComponents();
+                showNotification('❤️ Component liked!');
+            } catch (err) {
+                showNotification(`❌ ${err.message}`);
             }
-            
-            // Update sidebar
-            updateComponentSidebar();
-            
-            // Update main grid if visible
-            renderComponents();
-            
-            showNotification('❤️ Component liked!');
         }
+
 
         function closeComponentModal() {
             document.getElementById('componentModal').classList.add('hidden');
