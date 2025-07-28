@@ -384,9 +384,7 @@
                         <button onclick="switchTab('code')" id="codeTab" class="tab-btn px-6 py-4 font-medium transition-colors">
                             💻 Code
                         </button>
-                        <button onclick="switchTab('liveEditor')" id="liveEditorTab" class="tab-btn px-6 py-4 font-medium transition-colors">
-                            ✨ Live Editor
-                        </button>
+                        
                     </div>
 
                     <!-- Tab Content -->
@@ -447,102 +445,6 @@
                             </div>
                         </div>
 
-                        <!-- Live Editor Tab -->
-                        <div id="liveEditorContent" class="tab-content h-full hidden">
-                            <div class="flex h-full">
-                                <!-- Left Panel - Live Preview -->
-                                <div class="flex-1 border-r border-white/20 flex flex-col">
-                                    <div class="p-4 border-b border-white/20 flex items-center justify-between">
-                                        <h4 class="font-semibold text-gray-300">Live Preview</h4>
-                                        <div class="flex space-x-2">
-                                            <button onclick="toggleEditorPreviewTheme()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors" title="Toggle Theme">
-                                                🌓
-                                            </button>
-                                            <button onclick="resetLiveEditor()" class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors" title="Reset">
-                                                🔄
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 p-4">
-                                        <div id="livePreviewContainer" class="h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 flex items-center justify-center relative overflow-hidden">
-                                            <!-- Background Pattern -->
-                                            <div class="absolute inset-0 opacity-10">
-                                                <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0); background-size: 20px 20px;"></div>
-                                            </div>
-                                            
-                                            <div id="livePreview" class="relative z-10">
-                                                <!-- Live preview will be rendered here -->
-                                            </div>
-                                            
-                                            <!-- Error Display -->
-                                            <div id="previewError" class="absolute inset-0 flex items-center justify-center bg-red-900/20 backdrop-blur-sm rounded-xl hidden">
-                                                <div class="text-center p-6">
-                                                    <div class="text-4xl mb-4">⚠️</div>
-                                                    <h3 class="text-lg font-semibold text-red-300 mb-2">Preview Error</h3>
-                                                    <p id="errorMessage" class="text-red-200 text-sm"></p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Right Panel - Code Editors -->
-                                <div class="flex-1 flex flex-col">
-                                    <!-- Editor Tab Navigation -->
-                                    <div class="flex border-b border-white/20">
-                                        <button onclick="switchEditorTab('html')" id="htmlEditorTab" class="editor-tab-btn active px-4 py-3 text-sm font-medium transition-colors border-b-2 border-blue-500 text-blue-400">
-                                            📝 HTML
-                                        </button>
-                                        <button onclick="switchEditorTab('css')" id="cssEditorTab" class="editor-tab-btn px-4 py-3 text-sm font-medium transition-colors border-b-2 border-transparent text-gray-400 hover:text-white">
-                                            🎨 CSS
-                                        </button>
-                                    </div>
-                                    
-                                    <!-- Editor Actions -->
-                                    <div class="p-3 border-b border-white/20 flex items-center justify-between bg-slate-800/50">
-                                        <span class="text-sm text-gray-400">Live Editor - Changes reflect instantly</span>
-                                        <div class="flex space-x-2">
-                                            <button onclick="formatCode()" class="flex items-center space-x-1 px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-sm transition-colors">
-                                                <span>✨</span>
-                                                <span>Format</span>
-                                            </button>
-                                            <button onclick="copyCompleteCode()" class="flex items-center space-x-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors">
-                                                <span>📋</span>
-                                                <span>Copy</span>
-                                            </button>
-                                            <button onclick="resetEditorCode()" class="flex items-center space-x-1 px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded text-sm transition-colors">
-                                                <span>🔄</span>
-                                                <span>Reset</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Code Editor Content -->
-                                    <div class="flex-1 relative">
-                                        <!-- HTML Editor -->
-                                        <div id="htmlEditorContent" class="editor-content absolute inset-0">
-                                            <textarea 
-                                                id="htmlEditor" 
-                                                class="w-full h-full p-4 bg-slate-900 text-gray-300 font-mono text-sm resize-none focus:outline-none border-none"
-                                                placeholder="Enter your HTML code here..."
-                                                oninput="updateLivePreview()"
-                                                spellcheck="false"
-                                            ></textarea>
-                                        </div>
-                                        
-                                        <!-- CSS Editor -->
-                                        <div id="cssEditorContent" class="editor-content absolute inset-0 hidden">
-                                            <textarea 
-                                                id="cssEditor" 
-                                                class="w-full h-full p-4 bg-slate-900 text-gray-300 font-mono text-sm resize-none focus:outline-none border-none"
-                                                placeholder="Enter your CSS code here..."
-                                                oninput="updateLivePreview()"
-                                                spellcheck="false"
-                                            ></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
