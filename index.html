@@ -1045,25 +1045,23 @@
                 preview.appendChild(mountPoint);
 
                 try {
-                // ✅ Replace 'export default' with named function 'Component'
-                const jsxCode = code.replace("export default function", "function Component");
+                // 🔧 Remove 'export default function Name()' and bind to 'Component'
+                const jsxCode = code.replace(/export\s+default\s+function\s+(\w+)/, 'function $1') +
+                                `\nconst Component = ${RegExp.$1};`;
 
-                // ✅ Compile JSX to JS
-                const compiledCode = Babel.transform(jsxCode, { presets: ["react"] }).code;
+                const compiled = Babel.transform(jsxCode, { presets: ["react"] }).code;
+                const Component = new Function(`${compiled}; return Component;`)();
 
-                // ✅ Create a function and return the Component
-                const Component = new Function(`${compiledCode}; return Component;`)();
-
-                // ✅ Render the component
                 ReactDOM.createRoot(mountPoint).render(React.createElement(Component));
                 } catch (err) {
                 preview.innerHTML = `<div class="text-red-500 text-sm p-2">❌ React render error: ${err.message}</div>`;
                 }
             } else {
-                // Plain HTML fallback
+                // HTML fallback
                 preview.innerHTML = code + `<style>${currentComponent.css || ""}</style>`;
             }
         }
+
 
 
 
