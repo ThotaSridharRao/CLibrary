@@ -749,9 +749,22 @@
         }
 
         function logout() {
-            showNotification('👋 Logged out successfully!');
-            location.reload();
+            // Clear token from localStorage
+            localStorage.removeItem("token");
+
+            // Reset auth token and user
+            authToken = null;
+            currentUser = null;
+
+            // Update UI to show logged-out state
+            hideElement("logoutBtn");
+            showElement("loginBtn");
+            showElement("signupBtn");
+            document.getElementById("userGreeting").textContent = "";
+
+            showNotification("👋 Logged out successfully");
         }
+
 
         function checkPasswordStrength() {
             const password = document.getElementById('signupPassword').value;
