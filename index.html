@@ -1068,28 +1068,34 @@
             if (format === "html") {
                 formatted = `<style>\n${css}\n</style>\n\n${html}`;
             } else if (format === "react") {
+                const jsxLines = toJSX(html)
+                .split("\n")
+                .map(line => "    " + line.trim())  // Proper 4-space indent with trimmed lines
+                .join("\n");
+
                 formatted = `
-        function MyComponent() {
-        return (
-            <>
-        ${toJSX(html).split("\n").map(line => "      " + line).join("\n")}
-            </>
-        );
-        }`.trim();
+            function MyComponent() {
+            return (
+                <>
+            ${jsxLines}
+                </>
+            );
+            }`.trim();
             } else if (format === "vue") {
                 formatted = `
-        <template>
-        ${html}
-        </template>
+            <template>
+            ${html.trim()}
+            </template>
 
-        <style scoped>
-        ${css}
-        </style>
-        `.trim();
+            <style scoped>
+            ${css.trim()}
+            </style>
+            `.trim();
             }
 
             document.getElementById("formatCodeBlock").textContent = formatted;
         }
+
 
         function toJSX(html) {
             return html
